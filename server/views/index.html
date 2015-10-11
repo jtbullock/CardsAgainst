@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Cards Against</title>
+</head>
+<body>
+<h1>Oh my, an app!</h1>
+
+<h2>Please Enter Your Name</h2>
+Name: <input type="text" name="playerName" id="playerName" />
+    <button type="button" id="join">Join</button>
+
+<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
+<script>
+    var socket = io.connect('http://localhost:8082');
+    socket.on('news', function (data) {
+        console.log(data);
+        socket.emit('my other event', { my: 'data' });
+    });
+
+    socket.on('player joined', function(players) {
+        console.log(players);
+    });
+
+    $(function() {
+        $("#join").click(function() {
+            var playerName = $("#playerName").val();
+            socket.emit('player joined', playerName)
+        })
+    });
+</script>
+
+</body>
+</html>
