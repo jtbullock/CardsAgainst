@@ -32,7 +32,7 @@ app.get('/', function (req, res) {
         req.session.userId = guid.raw();
     }
 
-    res.sendfile('views/index.html');
+    res.sendFile('views/index.html', { root: __dirname });
 });
 
 // --------------------------
