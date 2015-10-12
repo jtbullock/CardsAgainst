@@ -1,17 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="cardsAgainstApp">
 <head lang="en">
     <meta charset="UTF-8">
     <title>Cards Against</title>
 </head>
 <body>
-<h1>Oh my, an app!</h1>
+<h1>Cards Against Humanity</h1>
 
-<h2>Please Enter Your Name</h2>
-Name: <input type="text" name="playerName" id="playerName" />
-    <button type="button" id="join">Join</button>
+<div ng-view></div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.js"></script>
 <!--<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>-->
 <script src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
 <script src="angular-route.js"></script>
