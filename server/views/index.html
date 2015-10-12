@@ -3,18 +3,27 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>Cards Against</title>
+    <link rel="stylesheet" href="vendor/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<h1>Cards Against Humanity</h1>
+  <section class="app-section col-md-4 col-md-offset-4">
+    <div class="panel panel-primary">
+      <header class="panel-heading">Cards Against Humanity</header>
+      <main ng-view></main>
+    </div>
+  </section>
 
-<div ng-view></div>
-
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.js"></script>
+<!--<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.js"></script>-->
 <!--<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>-->
-<script src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
-<script src="angular-route.js"></script>
-<script src="socket.js"></script>
+<!--<script src="https://cdn.socket.io/socket.io-1.3.7.js"></script>-->
+<script src="vendor/jquery/dist/jquery.min.js"></script>
+<script src="vendor/angular/angular.min.js"></script>
+<script src="vendor/angular-route/angular-route.min.js"></script>
+<script src="vendor/angular-socket-io/socket.min.js"></script>
+<script src="vendor/socket.io-client/socket.io.js"></script>
+<script src="vendor/bootstrap/dist/js/bootstrap.js"></script>
 <script src="app.js"></script>
 
 </body>

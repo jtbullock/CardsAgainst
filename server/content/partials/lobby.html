@@ -1,7 +1,10 @@
-<h2>Waiting for other players to join...</h2>
+<header>Waiting for other players to join...</header>
 
-<h3>Players Joined</h3>
-
-<ul ng-repeat="playa in vm.players">
-    <li>{{playa.name}}</li>
-</ul>
+<table class="table table-bordered">
+  <thead>
+    <th>Players Joined</th>
+  </thead>
+  <tr ng-repeat="playa in vm.players">
+    <td>{{playa.name}}</td>
+  </tr>
+</table>
