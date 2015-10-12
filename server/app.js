@@ -42,11 +42,7 @@ app.get('/', function (req, res) {
 // --------------------------
 // Socket.IO
 io.on('connection', function (socket) {
-    socket.emit('news', { hello: 'world' });
-    socket.on('my other event', function (data) {
-        console.log(data);
-    });
-    socket.on('player joined', function(playerName) {
+    socket.on('register player', function(playerName) {
         var userId=socket.request.headers.cookie.userId;
 
         players.push({id: userId, name: playerName});

@@ -19,10 +19,6 @@ Name: <input type="text" name="playerName" id="playerName" />
 
 <script>
     var socket = io.connect('http://localhost:8082');
-    socket.on('news', function (data) {
-        console.log(data);
-        socket.emit('my other event', { my: 'data' });
-    });
 
     socket.on('player joined', function(players) {
         console.log(players);
@@ -31,7 +27,7 @@ Name: <input type="text" name="playerName" id="playerName" />
 //    $(function() {
 //        $("#join").click(function() {
 //            var playerName = $("#playerName").val();
-//            socket.emit('player joined', playerName)
+//            socket.emit('register player', playerName)
 //        })
 //    });
 </script>
