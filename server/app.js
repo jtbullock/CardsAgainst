@@ -49,6 +49,6 @@ io.on('connection', function (socket) {
 
         console.log("Added player: " + playerName);
 
-        socket.emit('player joined', players);
+        io.emit('player joined', players);
     });
 });
