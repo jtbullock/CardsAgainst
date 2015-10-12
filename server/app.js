@@ -1,9 +1,11 @@
-var app = require('express')();
+var express = require('express');
+var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var cookieSession = require('cookie-session');
 var guid = require('guid');
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
+var path = require('path');
 
 server.listen(8082);
 
@@ -24,6 +26,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(bodyParser.json());
 
+app.use(express.static(path.join(__dirname, "content")));
+
 // --------------------------
 // Routes
 app.get('/', function (req, res) {
@@ -32,7 +36,7 @@ app.get('/', function (req, res) {
         req.session.userId = guid.raw();
     }
 
-    res.sendfile('views/index.html');
+    res.sendFile(path.join(__dirname, '/views/index.html'));
 });
 
 // --------------------------
