@@ -4,12 +4,16 @@
     <meta charset="UTF-8">
     <title>Cards Against</title>
     <link rel="stylesheet" href="vendor/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<h1>Cards Against Humanity</h1>
-
-<div ng-view></div>
+  <section class="app-section col-md-4 col-md-offset-4">
+    <div class="panel panel-primary">
+      <header class="panel-heading">Cards Against Humanity</header>
+      <main ng-view></main>
+    </div>
+  </section>
 
 <!--<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.js"></script>-->
 <!--<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>-->

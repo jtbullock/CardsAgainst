@@ -1,0 +1,16 @@
+.app-section {
+  margin-top: 10em;
+}
+
+.app-section header {
+  font-size: 1.2em;
+  margin-bottom: 0.4em;
+}
+
+.app-section header.panel-heading {
+  font-size: 1.5em;
+}
+
+.app-section main {
+  padding: 1em;
+}
