@@ -1,10 +1,11 @@
 var cardsAgainstApp = angular.module('cardsAgainstApp', ['ngRoute']);
 
-cardsAgainstApp.controller('RegisterCtrl', function() {});
+cardsAgainstApp
+    .config(config)
+    .controller('RegisterCtrl', registerCtrl)
+    .controller('LobbyCtrl', lobbyCtrl);
 
-cardsAgainstApp.controller('LobbyCtrl', function() {});
-
-cardsAgainstApp.config(['$routeProvider', function($routeProvider) {
+function config($routeProvider, $locationProvider) {
     $routeProvider.when('/register', {
         templateUrl: 'partials/register.html',
         controller: 'RegisterCtrl'
@@ -16,4 +17,12 @@ cardsAgainstApp.config(['$routeProvider', function($routeProvider) {
         otherwise({
             redirectTo: '/register'
         });
-}]);
+}
+
+function registerCtrl() {
+    var vm = this;
+}
+
+function lobbyCtrl() {
+    var vm = this;
+}
