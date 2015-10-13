@@ -1,16 +1,34 @@
-.app-section {
-  margin-top: 10em;
+.app-container {
+    border-style:solid;
+    border-width:0px 1px 1px 1px;
+    border-color:black;
 }
 
-.app-section header {
-  font-size: 1.2em;
-  margin-bottom: 0.4em;
+.app-header {
+    border-bottom:solid 1px black;
+    padding-top:12px;
+    padding-bottom:12px;
 }
 
-.app-section header.panel-heading {
-  font-size: 1.5em;
+.app-body {
+    padding-top:1em;
 }
 
-.app-section main {
-  padding: 1em;
+.player-list-container {
+    border-left:solid 1px black;
+    min-height:300px;
+    padding-top:1em;
+}
+
+.player-list {
+    list-style-type:none;
+    padding-left:0;
+}
+
+.player-list-header {
+    font-size:14pt;
+}
+
+.site-title {
+    font-size:16pt;
 }

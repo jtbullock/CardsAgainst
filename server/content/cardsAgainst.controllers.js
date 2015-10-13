@@ -13,8 +13,6 @@
   }
 
   function lobbyCtrl(GameService) {
-    var vm = this;
 
-    vm.players = GameService.players;
   }
 })();
