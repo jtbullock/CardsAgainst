@@ -12,7 +12,10 @@
     }
   }
 
-  function lobbyCtrl(GameService) {
+  function lobbyCtrl(GameService, $scope) {
+    var vm = this;
 
+    vm.playerId = GameService.playerInfo.playerId;
+    vm.userRole = GameService.playerInfo.userRole;
   }
 })();

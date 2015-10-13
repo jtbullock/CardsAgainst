@@ -12,6 +12,8 @@
 
     svc.players = [];
 
+    svc.playerInfo = {playerId: 0};
+
     svc.registerPlayer = function(playerName) {
       gameSocket.emit('register player', playerName);
     };
@@ -19,6 +21,10 @@
     svc.startListeners = function() {
       gameSocket.on('player joined', function(players) {
         angular.copy(players, svc.players);
+      });
+
+      gameSocket.on('player info', function(playerInfo) {
+        angular.copy(playerInfo, svc.playerInfo);
       });
     };
 
