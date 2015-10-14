@@ -1,6 +1,7 @@
 var config = require('../config');
 
 var gulp = require('gulp');
+var jshint = require('gulp-jshint');
 var concat = require('gulp-concat');
 var path = require('path');
 var Q = require('q');
@@ -22,6 +23,8 @@ module.exports = function() {
   var filename = config.client_script;
   return Q.Promise(function(resolve,reject) {
     gulp.src(src)
+      .pipe(jshint())
+      .pipe(jshint.reporter('default'))
       .pipe(concat(filename))
       .pipe(gulp.dest(dest))
       .on('end', resolve)
