@@ -1,8 +1,14 @@
 (function() {
+  "use strict";
+
   angular
-    .module('cardsAgainstApp', ['ngRoute', 'btford.socket-io'])
+    .module('cardsAgainst.router')
     .config(config)
-    .run(appStart);
+
+  config.$inject = [
+    "$routeProvider",
+    "$locationProvider"
+  ];
 
   function config($routeProvider, $locationProvider) {
     $routeProvider
@@ -17,9 +23,5 @@
       .otherwise({
         redirectTo: '/register'
       });
-  }
-
-  function appStart(GameService) {
-    GameService.startListeners();
   }
 })();

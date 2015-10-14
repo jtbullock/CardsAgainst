@@ -1,11 +1,13 @@
 (function() {
-  angular.module('cardsAgainstApp')
-    .factory('gameSocket', gameSocketFactory)
+  "use strict";
+
+  angular
+    .module('cardsAgainstApp.core')
     .factory('GameService', gameServiceFactory);
 
-  function gameSocketFactory(socketFactory) {
-    return socketFactory();
-  }
+  gameServiceFactory.$inject = [
+    "gameSocket"
+  ];
 
   function gameServiceFactory(gameSocket) {
     var svc = {};
@@ -32,4 +34,5 @@
 
     return svc;
   }
+
 })();
