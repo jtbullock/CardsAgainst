@@ -3,7 +3,7 @@
     .module('cardsAgainstApp.core')
     .factory('gameSocket', gameSocketFactory);
 
-  gameServiceFactory.$inject = [
+  gameSocketFactory.$inject = [
     "socketFactory"
   ];
 
