@@ -10,9 +10,7 @@ var Q = require('q');
 * Copy all angular templates into the templates directory. Return a promise.
 */
 module.exports = function() {
-  var src = mainBowerFiles({
-    filter: '**/*.css'
-  })
+  var src = mainBowerFiles('**/*.css')
   var dest = path.join(
     config.dest_dir,
     config.public_dirname,

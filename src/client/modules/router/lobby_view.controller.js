@@ -2,10 +2,14 @@
   "use strict";
 
   angular
-    .module('cardsAgainst.router')
+    .module('cardsAgainstApp.router')
     .controller('LobbyCtrl', lobbyCtrl);
 
-  function lobbyCtrl(GameService, $scope) {
+  lobbyCtrl.$inject = [
+    "GameService"
+  ];
+
+  function lobbyCtrl(GameService) {
     var vm = this;
 
     // For angular to automatically watch a service property,

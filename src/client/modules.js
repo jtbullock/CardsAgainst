@@ -3,24 +3,24 @@
 
   angular
     .module('cardsAgainstApp', [
-      'cardsAgainst.router',
-      'cardsAgainst.core',
-      'cardsAgainst.game'
+      'cardsAgainstApp.router',
+      'cardsAgainstApp.core',
+      'cardsAgainstApp.game'
     ]);
 
   angular
-    .module('cardsAgainst.router', [
+    .module('cardsAgainstApp.router', [
       'ngRoute'
     ]);
 
   angular
-    .module('cardsAgainst.game', [
-      'cardsAgainst.core'
+    .module('cardsAgainstApp.game', [
+      'cardsAgainstApp.core'
     ]);
 
   angular
     .module('cardsAgainstApp.core', [
-       'btford.socket-io'
-     ]);
+      'btford.socket-io'
+    ]);
 
 })();

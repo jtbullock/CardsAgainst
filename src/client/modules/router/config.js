@@ -1,8 +1,8 @@
 (function() {
   "use strict";
-
+  
   angular
-    .module('cardsAgainst.router')
+    .module('cardsAgainstApp.router')
     .config(config)
 
   config.$inject = [

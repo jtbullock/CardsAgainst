@@ -2,9 +2,14 @@
   "use strict";
 
   angular
-    .module('cardsAgainst.router')
+    .module('cardsAgainstApp.router')
     .controller('RegisterCtrl', registerCtrl);
 
+  registerCtrl.$inject = [
+    "GameService",
+    "$location"
+  ];
+  
   function registerCtrl(GameService, $location) {
     var vm = this;
 
