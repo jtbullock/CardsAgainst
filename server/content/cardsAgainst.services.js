@@ -23,10 +23,9 @@
         angular.copy(players, svc.players);
       });
 
-      gameSocket.on('player info', function(playerInfo) {
-        console.log(playerInfo.playerId);
-        console.log(playerInfo.userRole);
-        angular.copy(playerInfo, svc.playerInfo);
+      gameSocket.on('player info', function(gameInfo) {
+        angular.copy(gameInfo.playerInfo, svc.playerInfo);
+        angular.copy(gameInfo.players, svc.players);
       });
     };
 
