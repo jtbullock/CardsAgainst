@@ -1,6 +1,4 @@
 (function() {
-  "use strict";
-
   angular
     .module('cardsAgainstApp.game')
     .controller('PlayerListController', playerListController);

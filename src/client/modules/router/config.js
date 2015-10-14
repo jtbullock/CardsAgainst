@@ -1,9 +1,7 @@
 (function() {
-  "use strict";
-  
   angular
     .module('cardsAgainstApp.router')
-    .config(config)
+    .config(config);
 
   config.$inject = [
     "$routeProvider",

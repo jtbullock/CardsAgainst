@@ -1,6 +1,4 @@
 (function() {
-  "use strict";
-
   angular
     .module('cardsAgainstApp.game')
     .directive('playerList', playerList);
@@ -12,7 +10,7 @@
       controllerAs: 'vm',
       bindToController: true,
       templateUrl: 'templates/playerList.html'
-    }
+    };
   }
 
 })();

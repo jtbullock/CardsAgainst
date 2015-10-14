@@ -1,6 +1,4 @@
 (function() {
-  "use strict";
-
   angular
     .module('cardsAgainstApp.router')
     .controller('LobbyCtrl', lobbyCtrl);
