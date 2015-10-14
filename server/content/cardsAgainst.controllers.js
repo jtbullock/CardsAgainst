@@ -17,9 +17,11 @@
 
     // For angular to automatically watch a service property,
     // it needs to be an object, not a primitive.
-    vm.playerData = GameService.playerInfo;
+    console.log("Mapping to stuffs...");
 
-    vm.playerId = vm.playerData.playerId;
-    vm.userRole = vm.playerData.userRole;
+    vm.playerData = GameService.playerInfo;
+    //
+    //vm.playerId = vm.playerData.playerId;
+    //vm.userRole = vm.playerData.userRole;
   }
 })();

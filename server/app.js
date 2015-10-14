@@ -68,6 +68,7 @@ io.on('connection', function (socket) {
   numberOfPlayers++;
   console.log("User connected. Number of users: " + numberOfPlayers);
 
+  var userId = socket.handshake.session.userId;
   var userRole = 'player';
 
   console.log(numberOfPlayers === 1);
@@ -83,6 +84,7 @@ io.on('connection', function (socket) {
     players.push({id: userId, name: playerName});
 
     console.log("Player Registered: " + playerName);
+    console.log(players);
 
     // Update everyone with the new user
     io.emit('player joined', players.map(function(player) {
@@ -91,7 +93,6 @@ io.on('connection', function (socket) {
   });
 
   // Send the player his/her information
-  var userId = socket.handshake.session.userId;
   var userRole = userRole;
 
   var playerInfo = {
@@ -106,11 +107,25 @@ io.on('connection', function (socket) {
     playerInfo: playerInfo
   };
 
+  console.log("Sending player info");
+  console.dir(gameInfo);
+
   socket.emit('player info', gameInfo);
 
   // Handle player disconnect
   socket.on('disconnect', function() {
+
+    // TODO - this isn't working right.  Fix it sometime.
+    for(var i=0; i < players.length; i++) {
+      if(players[i].id === userId) {
+        players = players.slice(i, 1);
+        break;
+      }
+    };
+
     numberOfPlayers--;
-    console.log("User disconnected.  Users: " + numberOfPlayers)
+    console.log("User disconnected.  Users: " + numberOfPlayers);
+    console.dir(players);
+
   });
 });
