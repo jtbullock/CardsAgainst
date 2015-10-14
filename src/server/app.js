@@ -55,18 +55,7 @@ app.get('/', function (req, res) {
   if(req.session.isNew) {
     var userGuid = guid.raw();
     req.session.userId = userGuid;
-    req.session.testText = "Abc";
   }
-
-  if(numberOfPlayers == 0) {
-    req.session.userRole = 'host';
-  }
-  else {
-    req.session.userRole = 'player';
-  }
-
-  numberOfPlayers++;
-  console.log("User connected. Number of users: " + numberOfPlayers);
 
   res.sendFile(path.join(__dirname, '/views/index.html'));
 });
@@ -76,30 +65,67 @@ app.get('/', function (req, res) {
 io.use(socketSessionMiddleware);
 
 io.on('connection', function (socket) {
+  numberOfPlayers++;
+  console.log("User connected. Number of users: " + numberOfPlayers);
+
+  var userId = socket.handshake.session.userId;
+  var userRole = 'player';
+
+  console.log(numberOfPlayers === 1);
+
+  if(numberOfPlayers === 1) {
+    userRole = 'host';
+  };
+
+  // User has picked a username
   socket.on('register player', function(playerName) {
     var userId = socket.handshake.session.userId;
-    var userRole = socket.handshake.session.userRole;
 
-    players.push({id: userId, name: playerName, socket: socket});
+    players.push({id: userId, name: playerName});
 
-    console.log("Added player: " + playerName);
+    console.log("Player Registered: " + playerName);
+    console.log(players);
 
+    // Update everyone with the new user
     io.emit('player joined', players.map(function(player) {
       return {name: player.name}
     }));
-
-    var playerInfo = {
-      playerId: userId,
-      userRole: userRole
-    };
-
-    console.dir(playerInfo);
-
-    socket.emit('player info', playerInfo);
   });
 
+  // Send the player his/her information
+  var userRole = userRole;
+
+  var playerInfo = {
+    playerId: userId,
+    userRole: userRole
+  };
+
+  var gameInfo = {
+    players: players.map(function(player) {
+      return {name: player.name}
+    }),
+    playerInfo: playerInfo
+  };
+
+  console.log("Sending player info");
+  console.dir(gameInfo);
+
+  socket.emit('player info', gameInfo);
+
+  // Handle player disconnect
   socket.on('disconnect', function() {
+
+    // TODO - this isn't working right.  Fix it sometime.
+    for(var i=0; i < players.length; i++) {
+      if(players[i].id === userId) {
+        players = players.slice(i, 1);
+        break;
+      }
+    };
+
     numberOfPlayers--;
-    console.log("User disconnected.  Users: " + numberOfPlayers)
+    console.log("User disconnected.  Users: " + numberOfPlayers);
+    console.dir(players);
+
   });
 });
