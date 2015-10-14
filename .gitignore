@@ -1,2 +1,3 @@
 node_modules/
-server/content/vendor/
+bower_components/
+dist/

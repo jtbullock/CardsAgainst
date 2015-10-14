@@ -11,7 +11,7 @@
       controller: 'PlayerListController',
       controllerAs: 'vm',
       bindToController: true,
-      templateUrl: 'modules/game/templates/playerList.html'
+      templateUrl: 'templates/playerList.html'
     }
   }
 

@@ -13,11 +13,11 @@
   function config($routeProvider, $locationProvider) {
     $routeProvider
       .when('/register', {
-        templateUrl: 'partials/register.html',
+        templateUrl: 'templates/register.html',
         controller: 'RegisterCtrl as vm'
       })
       .when('/lobby', {
-        templateUrl: 'partials/lobby.html',
+        templateUrl: 'templates/lobby.html',
         controller: 'LobbyCtrl as vm'
       })
       .otherwise({

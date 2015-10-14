@@ -2,7 +2,7 @@
   "use strict";
 
   angular
-    .module('cardsAgainstApp.game')
+    .module('cardsAgainstApp.core')
     .run(appStart);
 
   appStart.$inject = [
