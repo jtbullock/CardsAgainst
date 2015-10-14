@@ -15,7 +15,11 @@
   function lobbyCtrl(GameService, $scope) {
     var vm = this;
 
-    vm.playerId = GameService.playerInfo.playerId;
-    vm.userRole = GameService.playerInfo.userRole;
+    // For angular to automatically watch a service property,
+    // it needs to be an object, not a primitive.
+    vm.playerData = GameService.playerInfo;
+
+    vm.playerId = vm.playerData.playerId;
+    vm.userRole = vm.playerData.userRole;
   }
 })();

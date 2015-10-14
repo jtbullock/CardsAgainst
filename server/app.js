@@ -66,6 +66,7 @@ app.get('/', function (req, res) {
   }
 
   numberOfPlayers++;
+  console.log("User connected. Number of users: " + numberOfPlayers);
 
   res.sendFile(path.join(__dirname, '/views/index.html'));
 });
@@ -95,5 +96,10 @@ io.on('connection', function (socket) {
     console.dir(playerInfo);
 
     socket.emit('player info', playerInfo);
+  });
+
+  socket.on('disconnect', function() {
+    numberOfPlayers--;
+    console.log("User disconnected.  Users: " + numberOfPlayers)
   });
 });
