@@ -1,15 +1,16 @@
 (function() {
   angular
     .module('cardsAgainstApp.game')
-    .directive('playerList', playerList);
+    .directive('game', game);
 
-  function playerList() {
+  function game() {
     return {
       restrict: 'A',
-      controller: 'PlayerListController',
+      controller: 'GameController',
       controllerAs: 'vm',
       bindToController: true,
-      templateUrl: 'templates/playerList.html'
+      scope: {},
+      templateUrl: 'templates/game.html'
     };
   }
 
