@@ -47,7 +47,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // Serving static resources
-app.use(express.static(path.join(__dirname, "content")));
+app.use(express.static(path.join(__dirname, "assets")));
 
 // --------------------------
 // Routes
@@ -57,7 +57,7 @@ app.get('/', function (req, res) {
     req.session.userId = userGuid;
   }
 
-  res.sendFile(path.join(__dirname, '/views/index.html'));
+  res.sendFile(path.join(__dirname, '/assets/index.html'));
 });
 
 // --------------------------

@@ -11,8 +11,8 @@
       controller: 'PlayerListController',
       controllerAs: 'vm',
       bindToController: true,
-      templateUrl: 'directives/templates/cardsAgainst.directives.playerList.html'
-    }
+      templateUrl: 'templates/cardsAgainst.directives.playerList.html'
+    };
   }
 
   function playerListController(GameService) {

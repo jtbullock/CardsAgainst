@@ -8,8 +8,8 @@
 
     vm.registerName = function() {
       GameService.registerPlayer(vm.username);
-      $location.url('/lobby')
-    }
+      $location.url('/lobby');
+    };
   }
 
   function lobbyCtrl(GameService, $scope) {
