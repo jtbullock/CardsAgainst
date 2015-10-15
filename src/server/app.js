@@ -57,7 +57,7 @@ app.get('/', function (req, res) {
     req.session.userId = userGuid;
   }
 
-  res.sendFile(path.join(__dirname, '/views/index.html'));
+  res.sendFile(path.join(__dirname, '/assets/index.html'));
 });
 
 // --------------------------
@@ -65,62 +65,67 @@ app.get('/', function (req, res) {
 io.use(socketSessionMiddleware);
 
 io.on('connection', function (socket) {
-  console.log("Anonymous Connect");
+  numberOfPlayers++;
+  console.log("User connected. Number of users: " + numberOfPlayers);
 
-  //returns a version of the player object free of private info
-  var safe = function(player) {
-    return {
-      name: player.name
-    }
-  }
-  var player;
+  var userId = socket.handshake.session.userId;
+  var userRole = 'player';
+
+  console.log(numberOfPlayers === 1);
+
+  if(numberOfPlayers === 1) {
+    userRole = 'host';
+  };
 
   // User has picked a username
   socket.on('register player', function(playerName) {
-    //setup the new player
-    player = {
-      id: socket.handshake.session.userId,
-      name: playerName,
-      host: (players.length === 0)
-    };
-    players.push(player);
+    var userId = socket.handshake.session.userId;
 
-    console.log("Player Registered (%s, %s)\t\t[Now %s Players]",
-      player.name,
-      player.host?'host':'not host',
-      players.length
-    );
+    players.push({id: userId, name: playerName});
+
+    console.log("Player Registered: " + playerName);
+    console.log(players);
 
     // Update everyone with the new user
-    io.emit('player joined', {
-      name: safe(player),
-      players: players.map(safe)
-    });
-
-    // Send the player his/her information
-    socket.emit('player info', player);
+    io.emit('player joined', players.map(function(player) {
+      return {name: player.name}
+    }));
   });
+
+  // Send the player his/her information
+  var userRole = userRole;
+
+  var playerInfo = {
+    playerId: userId,
+    userRole: userRole
+  };
+
+  var gameInfo = {
+    players: players.map(function(player) {
+      return {name: player.name}
+    }),
+    playerInfo: playerInfo
+  };
+
+  console.log("Sending player info");
+  console.dir(gameInfo);
+
+  socket.emit('player info', gameInfo);
 
   // Handle player disconnect
   socket.on('disconnect', function() {
-    var removed = players.some(function(current, index) {
-      if(player.id == current.id) {
-        players.splice(index,1);
-        return true;
-      }
-    });
 
-    if(removed) {
-      console.log("Player Left (%s, %s)\t\t[Now %s Players]",
-        player.name,
-        player.host?'host':'not host',
-        players.length
-      );
-      // Update everyone with the lost user
-      io.emit('player left', {
-        name: safe(player.name),
-        players: players.map(safe)
-      });
-    }
+    // TODO - this isn't working right.  Fix it sometime.
+    for(var i=0; i < players.length; i++) {
+      if(players[i].id === userId) {
+        players = players.slice(i, 1);
+        break;
+      }
+    };
+
+    numberOfPlayers--;
+    console.log("User disconnected.  Users: " + numberOfPlayers);
+    console.dir(players);
+
   });
 });

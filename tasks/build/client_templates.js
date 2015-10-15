@@ -10,7 +10,7 @@ var Q = require('q');
 */
 module.exports = function() {
   var src = [
-    path.join(config.src_dir, 'client/modules/**/*.html')
+    path.join(config.src_dir, 'client/**/*.html')
   ];
   var dest = path.join(
     config.dest_dir,
