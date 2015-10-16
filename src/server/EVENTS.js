@@ -13,4 +13,4 @@ module.exports = {
     start_join: 'start join',
     new_judge: 'new judge'
   }
-}
+};

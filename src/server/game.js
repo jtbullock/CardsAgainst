@@ -1,24 +1,25 @@
 var stateMachine = require('state-machine');
-var events = require('events');
+var EventEmitter = require('events').EventEmitter;
+var util = require('util');
 var EVENTS = require('./EVENTS');
 var _ = require('lodash');
 
-module.exports = Game
+module.exports = Game;
 
+util.inherits(Game, EventEmitter);
 function Game(gameConfig, opts) {
   // handle options
   var waitForPlayers = opts.waitForPlayers?opts.waitForPlayers.sort():null;
-  var firstJudge = opts.firstJudge
+  var firstJudge = opts.firstJudge;
 
-  // Call the EventEmitter constructor
-  events.EventEmitter.call(this);
+  EventEmitter.call(this);
 
   var game = this;
   var gameState = stateMachine();
   var timer;
 
   var judge;
-  var players = []
+  var players = [];
 
   /**
   * starts the game
@@ -32,8 +33,8 @@ function Game(gameConfig, opts) {
   * [Can only be used during the JoinGame state]
   */
   this.playerJoin = function(playerId) {
-    var correctState = (gameState.currentState() == 'JoinGame')
-    var isNew = (players.indexOf(playerId) == -1)
+    var correctState = (gameState.currentState() == 'JoinGame');
+    var isNew = (players.indexOf(playerId) == -1);
     if( correctState && isNew ) {
       players.push(playerId);
       players.sort();
@@ -49,7 +50,7 @@ function Game(gameConfig, opts) {
   */
   this.playerChoose = function(playerId, choiceId) {
 
-  }
+  };
 
   gameState
     .build()
@@ -67,11 +68,11 @@ function Game(gameConfig, opts) {
     .state('PlayersChoose', {
       enter: beforePlayersChoose,
       leave: afterPlayersChoose
-    })
+    });
 
   gameState.onChange = function(toState, fromState) {
     console.log('state changed from %s to %s', fromState, toState);
-  }
+  };
 
   // --------------------------
   // State Change Hooks
@@ -86,7 +87,7 @@ function Game(gameConfig, opts) {
 
   function beforeJoinGame() {
     game.emit(EVENTS.game.start_join);
-    timer = setTimeout(timeoutJoinGame, 5000)
+    timer = setTimeout(timeoutJoinGame, 5000);
   }
 
   function timeoutJoinGame() {
@@ -132,6 +133,3 @@ function Game(gameConfig, opts) {
   }
 
 }
-
-//inherit the EventEmitter prototype
-Game.prototype.__proto__ = events.EventEmitter.prototype;

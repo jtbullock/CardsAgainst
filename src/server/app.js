@@ -120,9 +120,9 @@ io.on('connection', function (socket) {
 
         players.forEach(function(player) {
           player.socket.on(EVENTS.socket.join_game, function() {
-            game.playerJoin(player.info.id)
+            game.playerJoin(player.info.id);
           });
-        })
+        });
 
         // Broadcast game states
 
@@ -133,10 +133,10 @@ io.on('connection', function (socket) {
         game.on(EVENTS.game.new_judge, function(judgeId) {
           var judge = _.find(players, function(player) {
             return player.info.id == judgeId;
-          })
+          });
           console.log('%s is judge', judge.info.name);
           judge.socket.emit(EVENTS.socket.make_judge);
-        })
+        });
 
         game.start();
       });
@@ -171,6 +171,6 @@ io.on('connection', function (socket) {
   function publicInfo(player) {
     return {
       name: player.info.name
-    }
+    };
   }
 });
