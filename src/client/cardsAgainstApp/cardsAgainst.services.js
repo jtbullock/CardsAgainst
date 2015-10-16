@@ -12,6 +12,13 @@
 
     svc.players = [];
 
+    //default game settings
+    svc.settings = {
+      gameTime: 60,
+      judgeTime: 30,
+      winningPoints: 10
+    };
+
     svc.playerInfo = {playerId: 0};
 
     svc.registerPlayer = function(playerName) {
