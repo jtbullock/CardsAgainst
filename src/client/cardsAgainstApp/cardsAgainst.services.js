@@ -7,7 +7,7 @@
     return socketFactory();
   }
 
-  function gameServiceFactory(gameSocket) {
+  function gameServiceFactory(gameSocket, EVENTS) {
     var svc = {};
 
     svc.players = [];
@@ -15,19 +15,19 @@
     svc.playerInfo = {playerId: 0};
 
     svc.registerPlayer = function(playerName) {
-      gameSocket.emit('register player', playerName);
+      gameSocket.emit(EVENTS.socket.register_player, playerName);
     };
 
     svc.startListeners = function() {
-      gameSocket.on('player joined', function(players) {
+      gameSocket.on(EVENTS.socket.player_join, function(players) {
         angular.copy(players, svc.players);
       });
 
-      gameSocket.on('player left', function(players) {
+      gameSocket.on(EVENTS.socket.player_left, function(players) {
         angular.copy(players, svc.players);
       });
 
-      gameSocket.on('player info', function(gameInfo) {
+      gameSocket.on(EVENTS.socket.player_info, function(gameInfo) {
         console.log('recieved player info');
         console.log(gameInfo);
         angular.copy(gameInfo.playerInfo, svc.playerInfo);
