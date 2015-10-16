@@ -9,7 +9,8 @@ var Q = require('q');
 */
 module.exports = function() {
   var src = [
-    path.join(config.src_dir, 'server/app.js')
+    path.join(config.src_dir, 'server/**/*.js'),
+    '!' + path.join(config.src_dir, 'server/views/**/*')
   ];
   var dest = config.dest_dir;
   return Q.Promise(function(resolve,reject) {
