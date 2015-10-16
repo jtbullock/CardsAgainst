@@ -8,7 +8,8 @@
         register_player: 'register player',
         new_game: 'new game',
         game_ready: 'game ready',
-        join_game: 'join game'
+        join_game: 'join game',
+        make_judge: 'make judge'
       }
     });
 })();

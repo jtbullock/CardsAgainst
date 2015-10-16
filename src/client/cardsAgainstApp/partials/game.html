@@ -1,1 +1,5 @@
-Game Page
+<header ng-if="!vm.playerData.judge">Choose a card</header>
+<div ng-if="vm.playerData.judge">
+  You're the Judge!<br />
+  Waiting for players to finish
+</div>

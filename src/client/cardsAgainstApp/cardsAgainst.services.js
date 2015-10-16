@@ -43,6 +43,11 @@
         gameSocket.emit(EVENTS.socket.join_game);
       });
 
+      gameSocket.on(EVENTS.socket.make_judge, function() {
+        console.log('make judge');
+        svc.playerInfo.judge = true;
+      });
+
       gameSocket.on(EVENTS.socket.player_info, function(gameInfo) {
         console.log('recieved player info');
         console.log(gameInfo);

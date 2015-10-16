@@ -31,5 +31,6 @@
   function gameCtrl(GameService) {
     var vm = this;
 
+    vm.playerData = GameService.playerInfo;
   }
 })();

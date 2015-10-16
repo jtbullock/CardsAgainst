@@ -6,6 +6,7 @@ var cookieSession = require('cookie-session');
 var guid = require('guid');
 var bodyParser = require('body-parser');
 var path = require('path');
+var _ = require('lodash');
 
 var Game = require('./game');
 
@@ -115,16 +116,27 @@ io.on('connection', function (socket) {
           })
         });
 
+        // Setup game player listeners
+
         players.forEach(function(player) {
           player.socket.on(EVENTS.socket.join_game, function() {
             game.playerJoin(player.info.id)
           });
         })
 
-        // Broadcast Game States
+        // Broadcast game states
+
         game.on(EVENTS.game.start_join, function() {
           io.emit(EVENTS.socket.game_ready);
         });
+
+        game.on(EVENTS.game.new_judge, function(judgeId) {
+          var judge = _.find(players, function(player) {
+            return player.info.id == judgeId;
+          })
+          console.log('%s is judge', judge.info.name);
+          judge.socket.emit(EVENTS.socket.make_judge);
+        })
 
         game.start();
       });
@@ -133,6 +145,8 @@ io.on('connection', function (socket) {
 
   // Handle player disconnect
   socket.on('disconnect', function() {
+    if(!player) return;
+
     var removed = players.some(function(current, index) {
       if(player.info.id == current.info.id) {
         players.splice(index,1);
