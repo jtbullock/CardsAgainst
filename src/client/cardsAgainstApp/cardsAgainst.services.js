@@ -23,6 +23,10 @@
         angular.copy(players, svc.players);
       });
 
+      gameSocket.on('player left', function(players) {
+        angular.copy(players, svc.players);
+      });
+
       gameSocket.on('player info', function(gameInfo) {
         console.log('recieved player info');
         console.log(gameInfo);
