@@ -1,7 +1,8 @@
 (function() {
   angular.module('cardsAgainstApp')
     .controller('RegisterCtrl', registerCtrl)
-    .controller('LobbyCtrl', lobbyCtrl);
+    .controller('LobbyCtrl', lobbyCtrl)
+    .controller('GameCtrl', gameCtrl);
 
   function registerCtrl(GameService, $location) {
     var vm = this;
@@ -23,5 +24,12 @@
     //
     //vm.playerId = vm.playerData.playerId;
     //vm.userRole = vm.playerData.userRole;
+
+    vm.newGame = GameService.newGame;
+  }
+
+  function gameCtrl(GameService) {
+    var vm = this;
+
   }
 })();

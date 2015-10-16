@@ -4,3 +4,7 @@
 
 Player ID: <span ng-bind="vm.playerData.id"></span>
 <br />Host: <span ng-bind="vm.playerData.host"></span>
+
+<button type="button" ng-if="vm.playerData.host" ng-click="vm.newGame()">
+  Start Game
+</button

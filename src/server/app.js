@@ -7,6 +7,8 @@ var guid = require('guid');
 var bodyParser = require('body-parser');
 var path = require('path');
 
+var Game = require('./game');
+
 var EVENTS = require('./EVENTS');
 
 server.listen(8082);
@@ -29,6 +31,7 @@ var socketSessionMiddleware = function(socket, next) {
 // --------------------------
 // Global In-memory game state
 var players = [];
+var host;
 
 // --------------------------
 // Middleware
@@ -74,15 +77,21 @@ io.on('connection', function (socket) {
   socket.on(EVENTS.socket.register_player, function(playerName) {
     //setup the new player
     player = {
-      id: socket.handshake.session.userId,
-      name: playerName,
-      host: (players.length === 0)
+      info: {
+        id: socket.handshake.session.userId,
+        name: playerName,
+        host: (players.length === 0),
+      },
+      socket: socket
     };
+
     players.push(player);
 
+    if(player.info.host) host = player;
+
     console.log("Player Registered (%s, %s)\t\t[Now %s Players]",
-      player.name,
-      player.host?'host':'not host',
+      player.info.name,
+      player.info.host?'host':'not host',
       players.length
     );
 
@@ -92,14 +101,40 @@ io.on('connection', function (socket) {
     // Send the player his/her information
     socket.emit(EVENTS.socket.player_info, {
       players: players.map(publicInfo),
-      playerInfo: player
+      playerInfo: player.info
     });
+
+    // Host Listeners
+    if(player.info.host) {
+      socket.on(EVENTS.socket.new_game, function(gameSettings) {
+
+        var game = new Game(gameSettings, {
+          firstJudge: host.id,
+          waitForPlayers: players.map(function(player) {
+            return player.info.id;
+          })
+        });
+
+        players.forEach(function(player) {
+          player.socket.on(EVENTS.socket.join_game, function() {
+            game.playerJoin(player.info.id)
+          });
+        })
+
+        // Broadcast Game States
+        game.on(EVENTS.game.start_join, function() {
+          io.emit(EVENTS.socket.game_ready);
+        });
+
+        game.start();
+      });
+    }
   });
 
   // Handle player disconnect
   socket.on('disconnect', function() {
     var removed = players.some(function(current, index) {
-      if(player.id == current.id) {
+      if(player.info.id == current.info.id) {
         players.splice(index,1);
         return true;
       }
@@ -107,8 +142,8 @@ io.on('connection', function (socket) {
 
     if(removed) {
       console.log("Player Left (%s, %s)\t\t[Now %s Players]",
-        player.name,
-        player.host?'host':'not host',
+        player.info.name,
+        player.info.host?'host':'not host',
         players.length
       );
       // Update everyone with the lost user
@@ -121,7 +156,7 @@ io.on('connection', function (socket) {
   */
   function publicInfo(player) {
     return {
-      name: player.name
+      name: player.info.name
     }
   }
 });
