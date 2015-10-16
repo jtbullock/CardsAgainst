@@ -24,7 +24,7 @@ module.exports = function() {
   return Q.Promise(function(resolve,reject) {
     gulp.src(src)
       .pipe(jshint())
-      .pipe(jshint.reporter('default'))
+      .pipe(jshint.reporter('jshint-stylish'))
       .pipe(concat(filename))
       .pipe(gulp.dest(dest))
       .on('end', resolve)
