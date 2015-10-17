@@ -8,3 +8,4 @@ var watch = require(taskDir+'/watch');
 //create tasks
 gulp.task('build', build);
 gulp.task('watch', watch);
+gulp.task('default', watch);

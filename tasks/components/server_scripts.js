@@ -31,15 +31,16 @@ var build = function() {
 /**
 * Start watch on server scripts. Return a promise.
 */
-var watch = function() {
-  return Q.Promise(function(resolve,reject) {
-    gulp.watch(src)
-      .on('change', function(event) {
-        gutil.log('-', gutil.colors.green('server changed:'), path.basename(event.path));
-        build();
-      })
-      .on('error', reject);
-  });
+var watch = function(onChange) {
+  return build()
+    .then(function() {
+      return Q.Promise(function(resolve,reject) {
+        gulp.watch(src)
+          .on('change', onChange)
+          .on('error', reject)
+          .on('ready', resolve);
+      });
+    });
 };
 
 module.exports = {
