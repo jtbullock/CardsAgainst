@@ -10,19 +10,18 @@ var serverApp = require('./build/server_app');
 var Q = require('q');
 
 /**
-* task: build
-* Run asset builds in parallel
-* Return a promise for their completion
+* task: watch
+* Watches all assets and rebuilds on change
 */
 module.exports = function() {
   return Q.all([
-    clientStylesheets.build(),
-    clientTemplates.build(),
-    clientScripts.build(),
-    vendorStylesheets.build(),
-    vendorScripts.build(),
-    vendorFonts.build(),
-    serverViews.build(),
-    serverScripts.build()
+    clientStylesheets.watch(),
+    clientTemplates.watch(),
+    clientScripts.watch(),
+    vendorStylesheets.watch(),
+    vendorScripts.watch(),
+    vendorFonts.watch(),
+    serverViews.watch(),
+    serverScripts.watch()
   ])
 };
