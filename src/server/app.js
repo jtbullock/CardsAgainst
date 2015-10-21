@@ -6,6 +6,11 @@ var cookieSession = require('cookie-session');
 var guid = require('guid');
 var bodyParser = require('body-parser');
 var path = require('path');
+var _ = require('lodash');
+
+var Game = require('./game');
+
+var EVENTS = require('./EVENTS');
 
 server.listen(8082);
 
@@ -27,7 +32,7 @@ var socketSessionMiddleware = function(socket, next) {
 // --------------------------
 // Global In-memory game state
 var players = [];
-var numberOfPlayers = 0;
+var host;
 
 // --------------------------
 // Middleware
@@ -65,67 +70,107 @@ app.get('/', function (req, res) {
 io.use(socketSessionMiddleware);
 
 io.on('connection', function (socket) {
-  numberOfPlayers++;
-  console.log("User connected. Number of users: " + numberOfPlayers);
+  console.log("Anonymous Connect");
 
-  var userId = socket.handshake.session.userId;
-  var userRole = 'player';
-
-  console.log(numberOfPlayers === 1);
-
-  if(numberOfPlayers === 1) {
-    userRole = 'host';
-  };
+  var player;
 
   // User has picked a username
-  socket.on('register player', function(playerName) {
-    var userId = socket.handshake.session.userId;
+  socket.on(EVENTS.socket.register_player, function(playerName) {
+    //setup the new player
+    player = {
+      info: {
+        id: socket.handshake.session.userId,
+        name: playerName,
+        host: (players.length === 0),
+      },
+      socket: socket
+    };
 
-    players.push({id: userId, name: playerName});
+    players.push(player);
 
-    console.log("Player Registered: " + playerName);
-    console.log(players);
+    if(player.info.host) host = player;
+
+    console.log("Player Registered (%s, %s)\t\t[Now %s Players]",
+      player.info.name,
+      player.info.host?'host':'not host',
+      players.length
+    );
 
     // Update everyone with the new user
-    io.emit('player joined', players.map(function(player) {
-      return {name: player.name}
-    }));
+    io.emit(EVENTS.socket.player_join, players.map(publicInfo));
+
+    // Send the player his/her information
+    socket.emit(EVENTS.socket.player_info, {
+      players: players.map(publicInfo),
+      playerInfo: player.info
+    });
+
+    // Host Listeners
+    if(player.info.host) {
+      socket.on(EVENTS.socket.new_game, function(gameSettings) {
+
+        var game = new Game(gameSettings, {
+          firstJudge: host.id,
+          waitForPlayers: players.map(function(player) {
+            return player.info.id;
+          })
+        });
+
+        // Setup game player listeners
+
+        players.forEach(function(player) {
+          player.socket.on(EVENTS.socket.join_game, function() {
+            game.playerJoin(player.info.id);
+          });
+        });
+
+        // Broadcast game states
+
+        game.on(EVENTS.game.start_join, function() {
+          io.emit(EVENTS.socket.game_ready);
+        });
+
+        game.on(EVENTS.game.new_judge, function(judgeId) {
+          var judge = _.find(players, function(player) {
+            return player.info.id == judgeId;
+          });
+          console.log('%s is judge', judge.info.name);
+          judge.socket.emit(EVENTS.socket.make_judge);
+        });
+
+        game.start();
+      });
+    }
   });
-
-  // Send the player his/her information
-  var userRole = userRole;
-
-  var playerInfo = {
-    playerId: userId,
-    userRole: userRole
-  };
-
-  var gameInfo = {
-    players: players.map(function(player) {
-      return {name: player.name}
-    }),
-    playerInfo: playerInfo
-  };
-
-  console.log("Sending player info");
-  console.dir(gameInfo);
-
-  socket.emit('player info', gameInfo);
 
   // Handle player disconnect
   socket.on('disconnect', function() {
+    if(!player) return;
 
-    // TODO - this isn't working right.  Fix it sometime.
-    for(var i=0; i < players.length; i++) {
-      if(players[i].id === userId) {
-        players = players.slice(i, 1);
-        break;
+    var removed = players.some(function(current, index) {
+      if(player.info.id == current.info.id) {
+        players.splice(index,1);
+        return true;
       }
-    };
+    });
 
-    numberOfPlayers--;
-    console.log("User disconnected.  Users: " + numberOfPlayers);
-    console.dir(players);
-
+    if(removed) {
+      console.log("Player Left (%s, %s)\t\t[Now %s Players]",
+        player.info.name,
+        player.info.host?'host':'not host',
+        players.length
+      );
+      // Update everyone with the lost user
+      io.emit(EVENTS.socket.player_left, players.map(publicInfo));
+    }
   });
+
+  /**
+  * Returns a player's public info
+  */
+  function publicInfo(player) {
+    return {
+      name: player.info.name
+    };
+  }
 });
