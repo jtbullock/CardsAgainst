@@ -1,4 +1,10 @@
+<div game-settings ng-if="vm.playerData.host"></div>
+
 <header>Waiting for other players to join...</header>
 
-Player ID: <span ng-bind="vm.playerData.playerId"></span>
-<br />Role: <span ng-bind="vm.playerData.userRole"></span>
+Player ID: <span ng-bind="vm.playerData.id"></span>
+<br />Host: <span ng-bind="vm.playerData.host"></span>
+
+<button type="button" ng-if="vm.playerData.host" ng-click="vm.newGame()">
+  Start Game
+</button

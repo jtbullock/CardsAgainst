@@ -14,6 +14,10 @@
         templateUrl: 'templates/lobby.html',
         controller: 'LobbyCtrl as vm'
       })
+      .when('/game', {
+        templateUrl: 'templates/game.html',
+        controller: 'GameCtrl as vm'
+      })
       .otherwise({
         redirectTo: '/register'
       });
