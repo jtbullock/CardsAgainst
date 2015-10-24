@@ -7,11 +7,7 @@ var _ = require('lodash');
 module.exports = Game;
 
 util.inherits(Game, EventEmitter);
-function Game(gameConfig, opts) {
-  // handle options
-  var waitForPlayers = opts.waitForPlayers?opts.waitForPlayers.sort():null;
-  var firstJudge = opts.firstJudge;
-
+function Game(settings, players, firstJudge) {
   EventEmitter.call(this);
 
   var game = this;
@@ -19,7 +15,6 @@ function Game(gameConfig, opts) {
   var timer;
 
   var judge;
-  var players = [];
 
   /**
   * starts the game
@@ -29,26 +24,10 @@ function Game(gameConfig, opts) {
   };
 
   /**
-  * Sets up the player to participate in this game.
-  * [Can only be used during the JoinGame state]
-  */
-  this.playerJoin = function(playerId) {
-    var correctState = (gameState.currentState() == 'JoinGame');
-    var isNew = (players.indexOf(playerId) == -1);
-    if( correctState && isNew ) {
-      players.push(playerId);
-      players.sort();
-      if(_.isEqual(players, waitForPlayers)) {
-        gameState.finish();
-      }
-    }
-  };
-
-  /**
   * Assigns a player's choice.
   * [Can only be used once during the PlayerChoose state]
   */
-  this.playerChoose = function(playerId, choiceId) {
+  this.playerChoose = function(player, choice) {
 
   };
 
@@ -56,15 +35,9 @@ function Game(gameConfig, opts) {
     .build()
     .state('InitialState', {
       initial: true,
-      enter: initialize
+      leave: initialize
     })
-    .event('start', 'InitialState', 'JoinGame')
-    .state('JoinGame', {
-      enter: beforeJoinGame,
-      leave: afterJoinGame
-    })
-    .event('timeout', 'JoinGame', 'PlayersChoose')
-    .event('finish', 'JoinGame', 'PlayersChoose')
+    .event('start', 'InitialState', 'PlayersChoose')
     .state('PlayersChoose', {
       enter: beforePlayersChoose,
       leave: afterPlayersChoose
@@ -80,22 +53,8 @@ function Game(gameConfig, opts) {
   // STATE : InitialState
 
   function initialize() {
+    game.emit(EVENTS.game.game_start);
     // TODO create game deck
-  }
-
-  // STATE : JoinGame
-
-  function beforeJoinGame() {
-    game.emit(EVENTS.game.start_join);
-    timer = setTimeout(timeoutJoinGame, 5000);
-  }
-
-  function timeoutJoinGame() {
-    gameState.timeout();
-  }
-
-  function afterJoinGame() {
-    clearTimeout(timer);
   }
 
   // STATE : PlayersChoose

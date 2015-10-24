@@ -40,7 +40,6 @@
 
       gameSocket.on(EVENTS.socket.game_ready, function() {
         $location.url('/game');
-        gameSocket.emit(EVENTS.socket.join_game);
       });
 
       gameSocket.on(EVENTS.socket.make_judge, function() {

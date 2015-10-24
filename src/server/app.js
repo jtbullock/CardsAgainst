@@ -38,7 +38,7 @@ var host;
 // Middleware
 
 // Session/cookies
-app.set('trust proxy', 1) // trust first proxy
+app.set('trust proxy', 1); // trust first proxy
 
 var thisCookieSession = cookieSession({
   name: 'GuestSession',
@@ -76,21 +76,18 @@ io.on('connection', function (socket) {
   socket.on(EVENTS.socket.register_player, function(playerName) {
     //setup the new player
     player = {
-      info: {
-        id: socket.handshake.session.userId,
-        name: playerName,
-        host: (players.length === 0),
-      },
+      id: socket.handshake.session.userId,
+      name: playerName,
       socket: socket
     };
 
+    if(players.length === 0) host = player;
+
     players.push(player);
 
-    if(player.info.host) host = player;
-
     console.log("Player Registered (%s, %s)\t\t[Now %s Players]",
-      player.info.name,
-      player.info.host?'host':'not host',
+      player.name,
+      player===host?'host':'not host',
       players.length
     );
 
@@ -100,39 +97,23 @@ io.on('connection', function (socket) {
     // Send the player his/her information
     socket.emit(EVENTS.socket.player_info, {
       players: players.map(publicInfo),
-      playerInfo: player.info
+      playerInfo: privateInfo(player)
     });
 
     // Host Listeners
-    if(player.info.host) {
+    if(player === host) {
       socket.on(EVENTS.socket.new_game, function(gameSettings) {
 
-        var game = new Game(gameSettings, {
-          firstJudge: host.id,
-          waitForPlayers: players.map(function(player) {
-            return player.info.id;
-          })
-        });
-
-        // Setup game player listeners
-
-        players.forEach(function(player) {
-          player.socket.on(EVENTS.socket.join_game, function() {
-            game.playerJoin(player.info.id);
-          });
-        });
+        var game = new Game(gameSettings, activePlayers(), host);
 
         // Broadcast game states
 
-        game.on(EVENTS.game.start_join, function() {
+        game.on(EVENTS.game.game_start, function() {
           io.emit(EVENTS.socket.game_ready);
         });
 
-        game.on(EVENTS.game.new_judge, function(judgeId) {
-          var judge = _.find(players, function(player) {
-            return player.info.id == judgeId;
-          });
-          console.log('%s is judge', judge.info.name);
+        game.on(EVENTS.game.new_judge, function(judge) {
+          console.log('%s is judge', judge.name);
           judge.socket.emit(EVENTS.socket.make_judge);
         });
 
@@ -145,30 +126,37 @@ io.on('connection', function (socket) {
   socket.on('disconnect', function() {
     if(!player) return;
 
-    var removed = players.some(function(current, index) {
-      if(player.info.id == current.info.id) {
-        players.splice(index,1);
-        return true;
-      }
-    });
+    _.pull(players, player);
 
-    if(removed) {
-      console.log("Player Left (%s, %s)\t\t[Now %s Players]",
-        player.info.name,
-        player.info.host?'host':'not host',
-        players.length
-      );
-      // Update everyone with the lost user
-      io.emit(EVENTS.socket.player_left, players.map(publicInfo));
-    }
+    console.log("Player Left (%s, %s)\t\t[Now %s Players]",
+      player.name,
+      player===host?'host':'not host',
+      players.length
+    );
+
+    io.emit(EVENTS.socket.player_left, players.map(publicInfo));
   });
 
   /**
   * Returns a player's public info
   */
   function publicInfo(player) {
-    return {
-      name: player.info.name
-    };
+    return _(player)
+      .omit('socket')
+      .omit('id')
+      .value();
+  }
+
+  function privateInfo(player) {
+    return _(player)
+      .omit('socket')
+      .set('host', player === host)
+      .value();
+  }
+
+  function activePlayers() {
+    return _(players)
+      .where('active')
+      .value();
   }
 });

@@ -10,7 +10,7 @@ module.exports = {
     make_judge: 'make judge'
   },
   game: {
-    start_join: 'start join',
+    game_start: 'game start',
     new_judge: 'new judge'
   }
 };
