@@ -37,9 +37,15 @@ function Game(settings, players, firstJudge) {
         enter: beforeJudgeChoose,
         leave: afterJudgeChoose
       })
+      .state('ShowWinner', {
+        enter: beforeShowWinner,
+        leave: afterShowWinner
+      })
       .event('start', 'Entry', 'PlayersChoose')
       .event('timeout', 'PlayersChoose', 'JudgeChoose')
-      .event('finish', 'PlayersChoose', 'JudgeChoose');
+      .event('finish', 'PlayersChoose', 'JudgeChoose')
+      .event('timeout', 'JudgeChoose', 'ShowWinner')
+      .event('finish', 'JudgeChoose', 'ShowWinner');
   });
 
   gameState.onChange = function(toState, fromState) {
@@ -94,14 +100,30 @@ function Game(settings, players, firstJudge) {
   }
 
   function beforeJudgeChoose() {
+    game.emit(EVENTS.game.game_data, gameData());
 
+    var stateTimeout = settings.gameTime * 1000;
+    game.emit(EVENTS.game.timer_set, Date.now() + stateTimeout);
+    timer = setTimeout(timeoutJudgeChoose, stateTimeout);
   }
 
   function timeoutJudgeChoose() {
-
+    gameState.timeout();
   }
 
   function afterJudgeChoose() {
+    clearTimeout(timer);
+  }
+
+  function beforeShowWinner() {
+
+  }
+
+  function timeoutShowWinner() {
+
+  }
+
+  function afterShowWinner() {
 
   }
 
@@ -133,12 +155,18 @@ function Game(settings, players, firstJudge) {
   function gameData() {
     return {
       round: {
+        state: gameState.currentState(),
         topic: topic,
         judge: judge.name
       },
-      wins: _(players)
+      players: _(players)
         .indexBy('name')
-        .mapValues('wins')
+        .mapValues(function(player) {
+          return {
+            wins: player.wins,
+            done: (player.choice !== null)
+          };
+        })
         .value()
     };
   }

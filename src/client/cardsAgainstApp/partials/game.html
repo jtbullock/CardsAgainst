@@ -1,7 +1,15 @@
-<header ng-if="!vm.playerData.isJudge">Choose a card</header>
-<div ng-if="vm.playerData.isJudge">
-  You're the Judge!<br />
-  Waiting for players to finish
+{{ vm.gameData.round.state }}
+<div ng-if="vm.gameData.round.state == 'PlayersChoose'">
+  <header ng-if="!vm.playerData.isJudge">Choose a card</header>
+  <div ng-if="vm.playerData.isJudge">
+    You're the Judge!<br />
+    Waiting for players to finish
+  </div>
 </div>
+<div ng-if="vm.gameData.round.state == 'JudgeChoose'">
+  <header ng-if="vm.playerData.isJudge">Choose a solution</header>
+</div>
+
+<div game-timer end-time="{{ vm.gameData.timerExpires }}"></div>
 
 <pre style="position: fixed; width:100%; left: 0; bottom: 0; height: 200px; overflow: auto;">{{vm | json}}</pre>
