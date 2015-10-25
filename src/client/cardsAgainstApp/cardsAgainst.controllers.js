@@ -33,5 +33,9 @@
 
     vm.playerData = GameService.playerData;
     vm.gameData = GameService.gameData;
+
+    vm.chooseCard = function(card) {
+      GameService.chooseCard(card);
+    };
   }
 })();

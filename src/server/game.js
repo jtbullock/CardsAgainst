@@ -69,8 +69,14 @@ function Game(settings, players, firstJudge) {
   * Assigns a player's choice.
   * [Can only be used once during the PlayerChoose state]
   */
-  this.playerChoose = function(player, choice) {
-
+  this.chooseCard = function(player, card) {
+    if(_.find(player.cards, card)) {
+      player.choice = card;
+      if(allPlayersChosen()) {
+        gameState.finish();
+      }
+      else game.emit(EVENTS.game.game_data, gameData());
+    }
   };
 
   // --------------------------
@@ -102,7 +108,7 @@ function Game(settings, players, firstJudge) {
   function beforeJudgeChoose() {
     game.emit(EVENTS.game.game_data, gameData());
 
-    var stateTimeout = settings.gameTime * 1000;
+    var stateTimeout = settings.judgeTime * 1000;
     game.emit(EVENTS.game.timer_set, Date.now() + stateTimeout);
     timer = setTimeout(timeoutJudgeChoose, stateTimeout);
   }
@@ -164,10 +170,14 @@ function Game(settings, players, firstJudge) {
         .mapValues(function(player) {
           return {
             wins: player.wins,
-            done: (player.choice !== null)
+            done: (!player.isJudge && player.choice !== null)
           };
         })
         .value()
     };
+  }
+
+  function allPlayersChosen() {
+    return _.all(_.without(players, judge), 'choice');
   }
 }

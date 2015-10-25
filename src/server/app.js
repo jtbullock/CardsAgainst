@@ -129,6 +129,13 @@ io.on('connection', function (socket) {
           io.emit(EVENTS.socket.timer_set, expires);
         });
 
+        players.forEach(function(player) {
+          player.socket.on(EVENTS.socket.choose_card, function(card) {
+            console.log('%s chose card %s', player.name, card.id);
+            game.chooseCard(player,card);
+          });
+        });
+
         game.start();
       });
     }

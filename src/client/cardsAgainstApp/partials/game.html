@@ -1,13 +1,38 @@
 {{ vm.gameData.round.state }}
 <div ng-if="vm.gameData.round.state == 'PlayersChoose'">
-  <header ng-if="!vm.playerData.isJudge">Choose a card</header>
+  <div ng-if="!vm.playerData.isJudge">
+    <header>Choose a card</header>
+    <div class="row" ng-repeat="card in vm.playerData.cards track by card.id">
+      <button type="button"
+              class="btn col-md-2"
+              ng-class="{
+                'btn-primary' : vm.selectedCard === card,
+                'btn-default' : vm.selectedCard !== card
+              }"
+              ng-click="vm.selectedCard = card">
+              Select
+      </button>
+      <div class="col-md-10">{{ card.body }}</div>
+    </div>
+    {{ vm.selectedCard }}
+    <button type="button"
+            class="btn btn-default"
+            ng-click="vm.chooseCard(vm.selectedCard)">
+            Finalize
+    </button>
+  </div>
   <div ng-if="vm.playerData.isJudge">
     You're the Judge!<br />
     Waiting for players to finish
   </div>
 </div>
 <div ng-if="vm.gameData.round.state == 'JudgeChoose'">
-  <header ng-if="vm.playerData.isJudge">Choose a solution</header>
+  <div ng-if="vm.playerData.isJudge">
+    <header>Pick a winner!</header>
+  </div>
+  <div ng-if="!vm.playerData.isJudge">
+    <header>Waiting for judge...</header>
+  </div>
 </div>
 
 <div game-timer end-time="{{ vm.gameData.timerExpires }}"></div>

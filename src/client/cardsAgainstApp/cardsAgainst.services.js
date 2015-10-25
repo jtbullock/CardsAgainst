@@ -30,6 +30,10 @@
       gameSocket.emit(EVENTS.socket.new_game, svc.settings);
     };
 
+    svc.chooseCard = function(card) {
+      gameSocket.emit(EVENTS.socket.choose_card, card);
+    };
+
     svc.startListeners = function() {
       gameSocket.on(EVENTS.socket.player_join, function(players) {
         angular.copy(players, svc.players);
