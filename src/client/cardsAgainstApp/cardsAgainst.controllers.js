@@ -20,7 +20,7 @@
     // it needs to be an object, not a primitive.
     console.log("Mapping to stuffs...");
 
-    vm.playerData = GameService.playerInfo;
+    vm.playerData = GameService.playerData;
     //
     //vm.playerId = vm.playerData.playerId;
     //vm.userRole = vm.playerData.userRole;
@@ -31,6 +31,7 @@
   function gameCtrl(GameService) {
     var vm = this;
 
-    vm.playerData = GameService.playerInfo;
+    vm.playerData = GameService.playerData;
+    vm.gameData = GameService.gameData;
   }
 })();
