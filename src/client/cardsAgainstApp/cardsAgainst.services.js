@@ -19,7 +19,8 @@
       winningPoints: 10
     };
 
-    svc.playerInfo = {playerId: 0};
+    svc.playerData = {};
+    svc.gameData = {};
 
     svc.registerPlayer = function(playerName) {
       gameSocket.emit(EVENTS.socket.register_player, playerName);
@@ -27,6 +28,10 @@
 
     svc.newGame = function() {
       gameSocket.emit(EVENTS.socket.new_game, svc.settings);
+    };
+
+    svc.chooseCard = function(card) {
+      gameSocket.emit(EVENTS.socket.choose_card, card);
     };
 
     svc.startListeners = function() {
@@ -38,21 +43,21 @@
         angular.copy(players, svc.players);
       });
 
-      gameSocket.on(EVENTS.socket.game_ready, function() {
+      gameSocket.on(EVENTS.socket.game_start, function() {
+        console.log('received GAME START');
         $location.url('/game');
-        gameSocket.emit(EVENTS.socket.join_game);
       });
 
-      gameSocket.on(EVENTS.socket.make_judge, function() {
-        console.log('make judge');
-        svc.playerInfo.judge = true;
+      gameSocket.on(EVENTS.socket.game_data, function(data) {
+        console.log('received GAME DATA');
+        console.log(data);
+        angular.copy(data, svc.gameData);
       });
 
-      gameSocket.on(EVENTS.socket.player_info, function(gameInfo) {
-        console.log('recieved player info');
-        console.log(gameInfo);
-        angular.copy(gameInfo.playerInfo, svc.playerInfo);
-        angular.copy(gameInfo.players, svc.players);
+      gameSocket.on(EVENTS.socket.player_data, function(data) {
+        console.log('received PLAYER DATA');
+        console.log(data);
+        angular.copy(data, svc.playerData);
       });
     };
 

@@ -2,134 +2,182 @@ var stateMachine = require('state-machine');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var EVENTS = require('./EVENTS');
+var GamePack = require('./gamePack');
 var _ = require('lodash');
 
 module.exports = Game;
 
 util.inherits(Game, EventEmitter);
-function Game(gameConfig, opts) {
-  // handle options
-  var waitForPlayers = opts.waitForPlayers?opts.waitForPlayers.sort():null;
-  var firstJudge = opts.firstJudge;
-
+function Game(settings, players, firstJudge) {
   EventEmitter.call(this);
 
   var game = this;
-  var gameState = stateMachine();
+  var blackDeck = GamePack.generateBlackDeck();
+  var whiteDeck = GamePack.generateWhiteDeck();
   var timer;
-
+  var timerExpires;
   var judge;
-  var players = [];
+
+  _.defaults(settings, {
+    handSize: 7,
+    gameTime: 60,
+    judgeTime: 30,
+    winningPoints: 10
+  });
+
+  var gameState = stateMachine(function (builder) {
+    builder
+      .state('Entry', {
+        initial: true
+      })
+      .state('PlayersChoose', {
+        enter: beforePlayersChoose,
+        leave: afterPlayersChoose
+      })
+      .state('JudgeChoose', {
+        enter: beforeJudgeChoose,
+        leave: afterJudgeChoose
+      })
+      .state('ShowWinner', {
+        enter: beforeShowWinner,
+        leave: afterShowWinner
+      })
+      .event('start', 'Entry', 'PlayersChoose')
+      .event('timeout', 'PlayersChoose', 'JudgeChoose')
+      .event('finish', 'PlayersChoose', 'JudgeChoose')
+      .event('timeout', 'JudgeChoose', 'ShowWinner')
+      .event('finish', 'JudgeChoose', 'ShowWinner');
+  });
+
+  gameState.onChange = function(toState, fromState) {
+    console.log('state changed from %s to %s', fromState, toState);
+  };
+
+  players.forEach(function(player) {
+    player.wins = 0;
+    player.cards = whiteDeck.drawMany(settings.handSize);
+  });
 
   /**
   * starts the game
   */
   this.start = function() {
     gameState.start();
-  };
-
-  /**
-  * Sets up the player to participate in this game.
-  * [Can only be used during the JoinGame state]
-  */
-  this.playerJoin = function(playerId) {
-    var correctState = (gameState.currentState() == 'JoinGame');
-    var isNew = (players.indexOf(playerId) == -1);
-    if( correctState && isNew ) {
-      players.push(playerId);
-      players.sort();
-      if(_.isEqual(players, waitForPlayers)) {
-        gameState.finish();
-      }
-    }
+    game.emit(EVENTS.game.game_start);
   };
 
   /**
   * Assigns a player's choice.
   * [Can only be used once during the PlayerChoose state]
   */
-  this.playerChoose = function(playerId, choiceId) {
-
-  };
-
-  gameState
-    .build()
-    .state('InitialState', {
-      initial: true,
-      enter: initialize
-    })
-    .event('start', 'InitialState', 'JoinGame')
-    .state('JoinGame', {
-      enter: beforeJoinGame,
-      leave: afterJoinGame
-    })
-    .event('timeout', 'JoinGame', 'PlayersChoose')
-    .event('finish', 'JoinGame', 'PlayersChoose')
-    .state('PlayersChoose', {
-      enter: beforePlayersChoose,
-      leave: afterPlayersChoose
-    });
-
-  gameState.onChange = function(toState, fromState) {
-    console.log('state changed from %s to %s', fromState, toState);
+  this.chooseCard = function(player, card) {
+    if(_.find(player.cards, card)) {
+      player.choice = card;
+      if(allPlayersChosen()) {
+        gameState.finish();
+      }
+      game.emit(EVENTS.game.game_data, gameData());
+    }
   };
 
   // --------------------------
   // State Change Hooks
 
-  // STATE : InitialState
-
-  function initialize() {
-    // TODO create game deck
-  }
-
-  // STATE : JoinGame
-
-  function beforeJoinGame() {
-    game.emit(EVENTS.game.start_join);
-    timer = setTimeout(timeoutJoinGame, 5000);
-  }
-
-  function timeoutJoinGame() {
-    gameState.timeout();
-  }
-
-  function afterJoinGame() {
-    clearTimeout(timer);
-  }
-
   // STATE : PlayersChoose
 
   function beforePlayersChoose() {
-    // select a judge for the round
-    if(!judge) judge = getFirstJudge();
-    else judge = nextJudge();
-    game.emit(EVENTS.game.new_judge, judge);
+    setupNextRound();
+    players.forEach(function(player) {
+      game.emit(EVENTS.game.player_data, player);
+    });
 
-    // TODO choose a black card
-
-    // TODO fill player`s' hands
-  }
-
-  function afterPlayersChoose() {
-
+    var duration = settings.gameTime * 1000;
+    timer = setTimeout(timeoutPlayersChoose, duration);
+    timerExpires = Date.now() + duration;
+    game.emit(EVENTS.game.game_data, gameData());
   }
 
   function timeoutPlayersChoose() {
+    gameState.timeout();
+  }
+
+  function afterPlayersChoose() {
+    clearTimeout(timer);
+  }
+
+  function beforeJudgeChoose() {
+    var duration = settings.judgeTime * 1000;
+    timer = setTimeout(timeoutJudgeChoose, duration);
+    timerExpires = Date.now() + duration;
+    game.emit(EVENTS.game.game_data, gameData());
+  }
+
+  function timeoutJudgeChoose() {
+    gameState.timeout();
+  }
+
+  function afterJudgeChoose() {
+    clearTimeout(timer);
+  }
+
+  function beforeShowWinner() {
+
+  }
+
+  function timeoutShowWinner() {
+
+  }
+
+  function afterShowWinner() {
 
   }
 
   // ----------------------
   // Other Private Methods
 
-  function getFirstJudge() {
-    return firstJudge || players[0];
+  function setupNextRound () {
+    // choose the next judge
+    if(!judge) judge = firstJudge;
+    else {
+      var lastIndex = _.findIndex(players, judge);
+      var nextIndex = (lastIndex + 1) % players.length;
+      judge = players[nextIndex];
+    }
+
+    // choose next topic
+    topic = blackDeck.draw();
+
+    // setup each player for the round
+    players.forEach(function(player) {
+      while(player.cards.length < settings.handSize) {
+        player.cards.push(whiteDeck.draw());
+      }
+      player.choice = null;  // reset choice
+      player.isJudge = (player === judge);
+    });
   }
 
-  function getNextJudge() {
-    var lastIndex = _.indexOf(players,judge);
-    var nextIndex = (lastIndex + 1) % players.length;
-    return players[nextIndex];
+  function gameData() {
+    return {
+      round: {
+        state: gameState.currentState(),
+        topic: topic,
+        judge: judge.name
+      },
+      players: _(players)
+        .indexBy('name')
+        .mapValues(function(player) {
+          return {
+            wins: player.wins,
+            done: (!player.isJudge && player.choice !== null)
+          };
+        })
+        .value(),
+      timerExpires: timerExpires
+    };
   }
 
+  function allPlayersChosen() {
+    return _.all(_.without(players, judge), 'choice');
+  }
 }
