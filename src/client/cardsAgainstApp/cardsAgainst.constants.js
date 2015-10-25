@@ -9,7 +9,6 @@
         game_start: 'game start',
         game_data: 'game data',
         player_data: 'player data',
-        timer_set: 'timer set',
         choose_card: 'choose card'
       }
     });

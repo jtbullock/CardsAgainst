@@ -15,6 +15,7 @@ function Game(settings, players, firstJudge) {
   var blackDeck = GamePack.generateBlackDeck();
   var whiteDeck = GamePack.generateWhiteDeck();
   var timer;
+  var timerExpires;
   var judge;
 
   _.defaults(settings, {
@@ -75,7 +76,7 @@ function Game(settings, players, firstJudge) {
       if(allPlayersChosen()) {
         gameState.finish();
       }
-      else game.emit(EVENTS.game.game_data, gameData());
+      game.emit(EVENTS.game.game_data, gameData());
     }
   };
 
@@ -86,15 +87,14 @@ function Game(settings, players, firstJudge) {
 
   function beforePlayersChoose() {
     setupNextRound();
-
-    game.emit(EVENTS.game.game_data, gameData());
     players.forEach(function(player) {
       game.emit(EVENTS.game.player_data, player);
     });
 
-    var stateTimeout = settings.gameTime * 1000;
-    game.emit(EVENTS.game.timer_set, Date.now() + stateTimeout);
-    timer = setTimeout(timeoutPlayersChoose, stateTimeout);
+    var duration = settings.gameTime * 1000;
+    timer = setTimeout(timeoutPlayersChoose, duration);
+    timerExpires = Date.now() + duration;
+    game.emit(EVENTS.game.game_data, gameData());
   }
 
   function timeoutPlayersChoose() {
@@ -106,11 +106,10 @@ function Game(settings, players, firstJudge) {
   }
 
   function beforeJudgeChoose() {
+    var duration = settings.judgeTime * 1000;
+    timer = setTimeout(timeoutJudgeChoose, duration);
+    timerExpires = Date.now() + duration;
     game.emit(EVENTS.game.game_data, gameData());
-
-    var stateTimeout = settings.judgeTime * 1000;
-    game.emit(EVENTS.game.timer_set, Date.now() + stateTimeout);
-    timer = setTimeout(timeoutJudgeChoose, stateTimeout);
   }
 
   function timeoutJudgeChoose() {
@@ -173,7 +172,8 @@ function Game(settings, players, firstJudge) {
             done: (!player.isJudge && player.choice !== null)
           };
         })
-        .value()
+        .value(),
+      timerExpires: timerExpires
     };
   }
 

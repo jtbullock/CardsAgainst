@@ -59,12 +59,6 @@
         console.log(data);
         angular.copy(data, svc.playerData);
       });
-
-      gameSocket.on(EVENTS.socket.timer_set, function(expires) {
-        console.log('received TIMER SET');
-        console.log(expires);
-        svc.gameData.timerExpires = expires;
-      });
     };
 
     return svc;
