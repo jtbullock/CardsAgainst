@@ -30,6 +30,6 @@
     });
     $rootScope.$on(GameService.events.register_success, function() {
       $location.url('/lobby');
-    })
+    });
   }
 })();

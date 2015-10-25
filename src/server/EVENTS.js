@@ -9,15 +9,18 @@ module.exports = {
     round_start: 'round start',
     make_player: 'make player',
     make_judge: 'make judge',
-    draw_card: 'draw card',
-    timer_set: 'timer set'
+    draw_cards: 'draw cards',
+    timer_set: 'timer set',
+    change_state: 'change state',
+    choose_card: 'choose card'
   },
   game: {
     game_start: 'game start',
     round_start: 'round start',
     make_player: 'make player',
     make_judge: 'make judge',
-    draw_card: 'draw card',
-    timer_set: 'timer set'
+    draw_cards: 'draw cards',
+    timer_set: 'timer set',
+    change_state: 'change state'
   }
 };

@@ -37,35 +37,46 @@ function Game(settings, players, firstJudge) {
         enter: beforeJudgeChoose,
         leave: afterJudgeChoose
       })
+      .state('ShowWinner', {
+        enter: beforeShowWinner,
+        leave: afterShowWinner
+      })
       .event('start', 'Entry', 'PlayersChoose')
       .event('timeout', 'PlayersChoose', 'JudgeChoose')
-      .event('finish', 'PlayersChoose', 'JudgeChoose');
+      .event('finish', 'PlayersChoose', 'JudgeChoose')
+      .event('timeout', 'JudgeChoose', 'ShowWinner')
+      .event('finish', 'JudgeChoose', 'ShowWinner');
   });
 
   gameState.onChange = function(toState, fromState) {
+    game.emit(EVENTS.game.change_state, toState);
     console.log('state changed from %s to %s', fromState, toState);
   };
 
   players.forEach(function(player) {
     player.wins = 0;
-    player.cards = [];
-    drawCards(player);
   });
 
   /**
   * starts the game
   */
   this.start = function() {
-    gameState.start();
     game.emit(EVENTS.game.game_start, gameData());
+    gameState.start();
   };
 
   /**
   * Assigns a player's choice.
   * [Can only be used once during the PlayerChoose state]
   */
-  this.playerChoose = function(player, choice) {
-
+  this.chooseCard = function(player, card) {
+    if(_.find(player.cards, card)) {
+      player.choice = card;
+      if(allPlayersChosen()) {
+        gameState.finish();
+      }
+      else game.emit(EVENTS.game.game_data, gameData());
+    }
   };
 
   // --------------------------
@@ -87,14 +98,26 @@ function Game(settings, players, firstJudge) {
   }
 
   function beforeJudgeChoose() {
-
+    startTimer(timeoutPlayersChoose, settings.judgeTime * 1000);
   }
 
   function timeoutJudgeChoose() {
-
+    gameState.timeout();
   }
 
   function afterJudgeChoose() {
+    clearTimeout(timer);
+  }
+
+  function beforeShowWinner() {
+
+  }
+
+  function timeoutShowWinner() {
+
+  }
+
+  function afterShowWinner() {
 
   }
 
@@ -120,25 +143,28 @@ function Game(settings, players, firstJudge) {
 
     // setup each player for the round
     players.forEach(function(player) {
-      if(player.isJudge) game.emit(EVENTS.game.make_player, player);
+      var wasUnset = player.isJudge === undefined;
+      var wasJudge = !!player.isJudge;
       player.isJudge = (player === judge);
       if(player.isJudge) game.emit(EVENTS.game.make_judge, player);
+      else if(wasJudge || wasUnset) game.emit(EVENTS.game.make_player, player);
+
+      if(!player.isJudge) drawCards(player);
 
       player.choice = null;  // reset choice
-
-      drawCards(player);
     });
   }
 
   function drawCards(player) {
+    if(!player.cards) player.cards = [];
     while(player.cards.length < settings.handSize) {
       var card = whiteDeck.draw();
       player.cards.push(card);
-      game.emit(EVENTS.game.draw_card, {
-        player: player,
-        card: card
-      });
     }
+    game.emit(EVENTS.game.draw_cards, {
+      player: player,
+      cards: player.cards
+    });
   }
 
   function startTimer(fn, duration) {
@@ -155,8 +181,17 @@ function Game(settings, players, firstJudge) {
       settings: settings,
       wins: _(players)
         .indexBy('name')
-        .mapValues('wins')
+        .mapValues(function(player) {
+          return {
+            wins: player.wins,
+            done: (!player.isJudge && player.choice !== null)
+          };
+        })
         .value()
     };
+  }
+
+  function allPlayersChosen() {
+    return _.all(_.without(players, judge), 'choice');
   }
 }

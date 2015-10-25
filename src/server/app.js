@@ -127,12 +127,23 @@ io.on('connection', function (socket) {
           player.socket.emit(EVENTS.socket.make_judge, playerPrivateData(player));
         });
 
-        game.on(EVENTS.game.draw_card, function(player, card) {
-          player.socket.emit(EVENTS.socket.draw_card, card);
+        game.on(EVENTS.game.draw_cards, function(data) {
+          data.player.socket.emit(EVENTS.socket.draw_cards, data.cards);
         });
 
         game.on(EVENTS.game.timer_set, function(expires) {
           io.emit(EVENTS.socket.timer_set, expires);
+        });
+
+        game.on(EVENTS.game.change_state, function(state) {
+          io.emit(EVENTS.socket.change_state, state);
+        });
+
+        players.forEach(function(player) {
+          player.socket.on(EVENTS.socket.choose_card, function(card) {
+            console.log('%s chose card %s', player.name, card.id);
+            game.chooseCard(player,card);
+          });
         });
 
         game.start();

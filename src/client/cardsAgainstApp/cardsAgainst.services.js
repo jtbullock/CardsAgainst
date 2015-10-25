@@ -10,12 +10,14 @@
     round_start:      'round start',
     make_player:      'make player',
     make_judge:       'make judge',
-    draw_card:        'draw card',
-    timer_set:        'timer set'
+    draw_cards:       'draw cards',
+    timer_set:        'timer set',
+    change_state:     'change state'
   };
   var client_events = {
     register_player:  'register player',
-    new_game:         'new game'
+    new_game:         'new game',
+    choose_card:      'choose card'
   };
   var namespace =     'gamesocket:';
 
@@ -48,6 +50,10 @@
       gameSocket.emit(client_events.new_game, svc.settings);
     };
 
+    svc.choosePlayerCard = function(card) {
+      gameSocket.emit(client_events.choose_card, card);
+    };
+
     svc.startListeners = function() {
       gameSocket.on(server_events.player_join, function(players) {
         console.log('received PLAYER JOIN');
@@ -66,12 +72,12 @@
 
       gameSocket.on(server_events.game_start, function(data) {
         console.log('received GAME START');
-        angular.copy(data, svc.gameData);
+        angular.extend(svc.gameData, data);
       });
 
       gameSocket.on(server_events.round_start, function(data) {
         console.log('received ROUND START');
-        angular.copy(data, svc.roundData);
+        angular.extend(svc.roundData, data);
       });
 
       gameSocket.on(server_events.make_judge, function(data) {
@@ -84,15 +90,19 @@
         svc.playerData.isJudge = false;
       });
 
-      gameSocket.on(server_events.draw_card, function(card) {
-        console.log('received DRAW CARD');
-        svc.playerData.cards.push(card);
+      gameSocket.on(server_events.draw_cards, function(cards) {
+        console.log('received DRAW CARDS');
+        svc.playerData.cards = cards;
       });
 
       gameSocket.on(server_events.timer_set, function(expires) {
         console.log('received TIMER SET');
-        console.log(expires);
         svc.gameData.timerExpires = expires;
+      });
+
+      gameSocket.on(server_events.change_state, function(state) {
+        console.log('received CHANGE STATE');
+        svc.gameData.state = state;
       });
     };
 

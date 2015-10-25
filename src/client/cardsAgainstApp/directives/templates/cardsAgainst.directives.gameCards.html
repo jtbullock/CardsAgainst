@@ -1,0 +1,19 @@
+<div class="row"
+     ng-repeat="card in vm.playerData.cards track by card.id">
+  <button type="button"
+          class="btn col-md-2"
+          ng-class="{
+            'btn-primary' : vm.selected(card),
+            'btn-default' : !vm.selected(card)
+          }"
+          ng-click="vm.select(card)">
+          Select
+  </button>
+  <div class="col-md-10">{{ card.body }}</div>
+</div>
+{{ selectedCard }}
+<button type="button"
+        class="btn btn-default"
+        ng-click="vm.submitSelection()">
+        Finalize
+</button>

@@ -1,5 +1,22 @@
-<header ng-if="!vm.playerData.isJudge">Choose a card</header>
-<div ng-if="vm.playerData.isJudge">
-  You're the Judge!<br />
-  Waiting for players to finish
+{{ vm.gameData.state }}
+<div ng-if="vm.gameData.state == 'PlayersChoose'">
+  <div ng-if="!vm.playerData.isJudge">
+    <header>Choose a card</header>
+    <div game-cards></div>
+  </div>
+  <div ng-if="vm.playerData.isJudge">
+    You're the Judge!<br />
+    Waiting for players to finish
+  </div>
 </div>
+
+<div ng-if="vm.gameData.state == 'JudgeChoose'">
+  <div ng-if="vm.playerData.isJudge">
+    <header>Pick a winner!</header>
+  </div>
+  <div ng-if="!vm.playerData.isJudge">
+    <header>Waiting for judge...</header>
+  </div>
+</div>
+
+<div game-timer end-time="{{ vm.gameData.timerExpires }}"></div>
