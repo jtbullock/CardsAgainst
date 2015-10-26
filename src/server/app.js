@@ -51,19 +51,17 @@ app.use(thisCookieSession);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// Serving static resources
-app.use(express.static(path.join(__dirname, "assets")));
-
-// --------------------------
-// Routes
-app.get('/', function (req, res) {
+app.use(function (req, res, next) {
   if(req.session.isNew) {
     var userGuid = guid.raw();
     req.session.userId = userGuid;
   }
 
-  res.sendFile(path.join(__dirname, '/assets/index.html'));
+  next();
 });
+
+// Serving static resources
+app.use(express.static(path.join(__dirname, "assets")));
 
 // --------------------------
 // Socket.IO
