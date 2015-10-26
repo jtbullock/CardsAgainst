@@ -79,6 +79,15 @@ function Game(settings, players, firstJudge) {
     }
   };
 
+  this.chooseWinner = function(player, card) {
+    console.log('selecting winner');
+    if(player === judge) {
+      var winner = _.find(players, {choice: card});
+      if(winner) console.log('%s wins!', winner.name);
+      else console.log('no winner found');
+    }
+  };
+
   // --------------------------
   // State Change Hooks
 
@@ -99,6 +108,10 @@ function Game(settings, players, firstJudge) {
 
   function beforeJudgeChoose() {
     startTimer(timeoutPlayersChoose, settings.judgeTime * 1000);
+    game.emit(EVENTS.game.player_choices, {
+      judge: judge,
+      choices: playerChoices()
+    });
   }
 
   function timeoutJudgeChoose() {
@@ -192,6 +205,10 @@ function Game(settings, players, firstJudge) {
   }
 
   function allPlayersChosen() {
-    return _.all(_.without(players, judge), 'choice');
+    return _(players).without(judge).all('choice');
+  }
+
+  function playerChoices() {
+    return _(players).map('choice').compact().value();
   }
 }

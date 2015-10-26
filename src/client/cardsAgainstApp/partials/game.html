@@ -2,7 +2,7 @@
 <div ng-if="vm.gameData.state == 'PlayersChoose'">
   <div ng-if="!vm.playerData.isJudge">
     <header>Choose a card</header>
-    <div game-cards></div>
+    <div player-cards></div>
   </div>
   <div ng-if="vm.playerData.isJudge">
     You're the Judge!<br />
@@ -13,9 +13,10 @@
 <div ng-if="vm.gameData.state == 'JudgeChoose'">
   <div ng-if="vm.playerData.isJudge">
     <header>Pick a winner!</header>
+    <div judge-cards></div>
   </div>
   <div ng-if="!vm.playerData.isJudge">
-    <header>Waiting for judge...</header>
+    <header>Waiting for judge to finish</header>
   </div>
 </div>
 

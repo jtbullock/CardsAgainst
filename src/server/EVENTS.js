@@ -3,8 +3,10 @@ module.exports = {
     player_join: 'player joined',
     player_left: 'player left',
     register_player: 'register player',
-    register_success: 'register success',
     new_game: 'new game',
+    choose_card: 'choose card',
+    choose_winner: 'choose winner',
+    register_success: 'register success',
     game_start: 'game start',
     round_start: 'round start',
     make_player: 'make player',
@@ -12,7 +14,7 @@ module.exports = {
     draw_cards: 'draw cards',
     timer_set: 'timer set',
     change_state: 'change state',
-    choose_card: 'choose card'
+    player_choices: 'player choices'
   },
   game: {
     game_start: 'game start',
@@ -21,6 +23,7 @@ module.exports = {
     make_judge: 'make judge',
     draw_cards: 'draw cards',
     timer_set: 'timer set',
-    change_state: 'change state'
+    change_state: 'change state',
+    player_choices: 'player choices'
   }
 };

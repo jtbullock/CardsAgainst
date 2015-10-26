@@ -139,11 +139,21 @@ io.on('connection', function (socket) {
           io.emit(EVENTS.socket.change_state, state);
         });
 
+        game.on(EVENTS.game.player_choices, function(data) {
+          data.judge.socket.emit(EVENTS.socket.player_choices, data.choices);
+        });
+
         players.forEach(function(player) {
           player.socket.on(EVENTS.socket.choose_card, function(card) {
             console.log('%s chose card %s', player.name, card.id);
             game.chooseCard(player,card);
           });
+
+          player.socket.on(EVENTS.socket.choose_winner, function(card) {
+            console.log('%s chose winner %s', player.name, card.id);
+            game.chooseWinner(player, card);
+          });
+
         });
 
         game.start();

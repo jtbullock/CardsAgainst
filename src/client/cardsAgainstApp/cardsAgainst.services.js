@@ -12,12 +12,14 @@
     make_judge:       'make judge',
     draw_cards:       'draw cards',
     timer_set:        'timer set',
-    change_state:     'change state'
+    change_state:     'change state',
+    player_choices:   'player choices'
   };
   var client_events = {
     register_player:  'register player',
     new_game:         'new game',
-    choose_card:      'choose card'
+    choose_card:      'choose card',
+    choose_winner:    'choose winner'
   };
   var namespace =     'gamesocket:';
 
@@ -52,6 +54,10 @@
 
     svc.choosePlayerCard = function(card) {
       gameSocket.emit(client_events.choose_card, card);
+    };
+
+    svc.chooseRoundWinner = function(card) {
+      gameSocket.emit(client_events.choose_winner, card);
     };
 
     svc.startListeners = function() {
@@ -103,6 +109,16 @@
       gameSocket.on(server_events.change_state, function(state) {
         console.log('received CHANGE STATE');
         svc.gameData.state = state;
+      });
+
+      gameSocket.on(server_events.change_state, function(state) {
+        console.log('received CHANGE STATE');
+        svc.gameData.state = state;
+      });
+
+      gameSocket.on(server_events.player_choices, function(choices) {
+        console.log('received PLAYER CHOICES');
+        svc.roundData.playerChoices = choices;
       });
     };
 

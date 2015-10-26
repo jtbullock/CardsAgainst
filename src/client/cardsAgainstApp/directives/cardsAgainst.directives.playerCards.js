@@ -2,24 +2,24 @@
 
   angular
     .module('cardsAgainstApp')
-    .directive('gameCards', gameCards)
-    .controller('GameCardsController', GameCardsController);
+    .directive('playerCards', playerCards)
+    .controller('PlayerCardsController', PlayerCardsController);
 
-  function gameCards() {
+  function playerCards() {
     return {
       restrict: 'A',
-      controller: 'GameCardsController',
+      controller: 'PlayerCardsController',
       controllerAs: 'vm',
       bindToController: true,
-      templateUrl: 'templates/cardsAgainst.directives.gameCards.html'
+      templateUrl: 'templates/cardsAgainst.directives.playerCards.html'
     };
   }
 
-  function GameCardsController(GameService) {
+  function PlayerCardsController(GameService) {
     var vm = this;
     var selected;
 
-    vm.playerData = GameService.playerData;
+    vm.cards = GameService.playerData.cards;
 
     vm.selected = function(card) {
       return !!selected && selected === card;
