@@ -5,9 +5,13 @@
   var server_events = {
     player_join:      'player joined',
     player_left:      'player left',
-    player_info:      'player info',
-    game_ready:       'game ready',
-    make_judge:       'make judge'
+    register_success: 'register success',
+    game_start:       'game start',
+    round_start:      'round start',
+    make_player:      'make player',
+    make_judge:       'make judge',
+    draw_card:        'draw card',
+    timer_set:        'timer set'
   };
   var client_events = {
     register_player:  'register player',
@@ -15,7 +19,7 @@
   };
   var namespace =     'gamesocket:';
 
-  function gameServiceFactory($location, socketFactory) {
+  function gameServiceFactory(socketFactory) {
     var svc = {};
     var gameSocket = socketFactory({
       prefix: namespace
@@ -32,7 +36,9 @@
       winningPoints: 10
     };
 
-    svc.playerInfo = {};
+    svc.playerData = {};
+    svc.roundData = {};
+    svc.gameData = {};
 
     svc.registerPlayer = function(playerName) {
       gameSocket.emit(client_events.register_player, playerName);
@@ -44,27 +50,49 @@
 
     svc.startListeners = function() {
       gameSocket.on(server_events.player_join, function(players) {
+        console.log('received PLAYER JOIN');
         angular.copy(players, svc.players);
       });
 
       gameSocket.on(server_events.player_left, function(players) {
+        console.log('received PLAYER LEFT');
         angular.copy(players, svc.players);
       });
 
-      gameSocket.on(server_events.game_ready, function() {
-        $location.url('/game');
+      gameSocket.on(server_events.register_success, function(data) {
+        console.log('received REGISTER SUCCESS');
+        angular.extend(svc.playerData, data);
       });
 
-      gameSocket.on(server_events.make_judge, function() {
-        console.log('make judge');
-        svc.playerInfo.judge = true;
+      gameSocket.on(server_events.game_start, function(data) {
+        console.log('received GAME START');
+        angular.copy(data, svc.gameData);
       });
 
-      gameSocket.on(server_events.player_info, function(gameInfo) {
-        console.log('recieved player info');
-        console.log(gameInfo);
-        angular.copy(gameInfo.playerInfo, svc.playerInfo);
-        angular.copy(gameInfo.players, svc.players);
+      gameSocket.on(server_events.round_start, function(data) {
+        console.log('received ROUND START');
+        angular.copy(data, svc.roundData);
+      });
+
+      gameSocket.on(server_events.make_judge, function(data) {
+        console.log('received MAKE JUDGE');
+        svc.playerData.isJudge = true;
+      });
+
+      gameSocket.on(server_events.make_player, function(data) {
+        console.log('received MAKE PLAYER');
+        svc.playerData.isJudge = false;
+      });
+
+      gameSocket.on(server_events.draw_card, function(card) {
+        console.log('received DRAW CARD');
+        svc.playerData.cards.push(card);
+      });
+
+      gameSocket.on(server_events.timer_set, function(expires) {
+        console.log('received TIMER SET');
+        console.log(expires);
+        svc.gameData.timerExpires = expires;
       });
     };
 

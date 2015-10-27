@@ -23,7 +23,13 @@
       });
   }
 
-  function appStart(GameService) {
+  function appStart($location, $rootScope, GameService) {
     GameService.startListeners();
+    $rootScope.$on(GameService.events.game_start, function() {
+      $location.url('/game');
+    });
+    $rootScope.$on(GameService.events.register_success, function() {
+      $location.url('/lobby');
+    })
   }
 })();

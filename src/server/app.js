@@ -78,27 +78,30 @@ io.on('connection', function (socket) {
     player = {
       id: socket.handshake.session.userId,
       name: playerName,
+      score: 0,
+      active: true,
       socket: socket
     };
 
-    if(players.length === 0) host = player;
+    if(players.length === 0) {
+      host = player;
+      player.isHost = true;
+    }
+    else player.isHost = false;
 
     players.push(player);
 
     console.log("Player Registered (%s, %s)\t\t[Now %s Players]",
       player.name,
-      player===host?'host':'not host',
+      player.isHost?'host':'not host',
       players.length
     );
 
     // Update everyone with the new user
-    io.emit(EVENTS.socket.player_join, players.map(publicInfo));
+    io.emit(EVENTS.socket.player_join, players.map(playerPublicData));
 
     // Send the player his/her information
-    socket.emit(EVENTS.socket.player_info, {
-      players: players.map(publicInfo),
-      playerInfo: privateInfo(player)
-    });
+    socket.emit(EVENTS.socket.register_success, playerPrivateData(player));
 
     // Host Listeners
     if(player === host) {
@@ -108,13 +111,28 @@ io.on('connection', function (socket) {
 
         // Broadcast game states
 
-        game.on(EVENTS.game.game_start, function() {
-          io.emit(EVENTS.socket.game_ready);
+        game.on(EVENTS.game.game_start, function(data) {
+          io.emit(EVENTS.socket.game_start, data);
         });
 
-        game.on(EVENTS.game.new_judge, function(judge) {
-          console.log('%s is judge', judge.name);
-          judge.socket.emit(EVENTS.socket.make_judge);
+        game.on(EVENTS.game.round_start, function(data) {
+          io.emit(EVENTS.socket.round_start, data);
+        });
+
+        game.on(EVENTS.game.make_player, function(player) {
+          player.socket.emit(EVENTS.socket.make_player, playerPrivateData(player));
+        });
+
+        game.on(EVENTS.game.make_judge, function(player) {
+          player.socket.emit(EVENTS.socket.make_judge, playerPrivateData(player));
+        });
+
+        game.on(EVENTS.game.draw_card, function(player, card) {
+          player.socket.emit(EVENTS.socket.draw_card, card);
+        });
+
+        game.on(EVENTS.game.timer_set, function(expires) {
+          io.emit(EVENTS.socket.timer_set, expires);
         });
 
         game.start();
@@ -130,33 +148,25 @@ io.on('connection', function (socket) {
 
     console.log("Player Left (%s, %s)\t\t[Now %s Players]",
       player.name,
-      player===host?'host':'not host',
+      player.isHost?'host':'not host',
       players.length
     );
 
-    io.emit(EVENTS.socket.player_left, players.map(publicInfo));
+    io.emit(EVENTS.socket.player_left, players.map(playerPublicData));
   });
 
   /**
   * Returns a player's public info
   */
-  function publicInfo(player) {
-    return _(player)
-      .omit('socket')
-      .omit('id')
-      .value();
+  function playerPublicData(player) {
+    return _.pick(player, 'name', 'score');
   }
 
-  function privateInfo(player) {
-    return _(player)
-      .omit('socket')
-      .set('host', player === host)
-      .value();
+  function playerPrivateData(player) {
+    return _.omit(player,'socket');
   }
 
   function activePlayers() {
-    return _(players)
-      .where('active')
-      .value();
+    return _.where(players, { active: true });
   }
 });
