@@ -31,6 +31,7 @@
     var vm = this;
 
     vm.playerData = GameService.playerData;
+    vm.roundData = GameService.roundData;
     vm.gameData = GameService.gameData;
   }
 })();

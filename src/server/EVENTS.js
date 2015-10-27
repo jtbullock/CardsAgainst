@@ -14,7 +14,8 @@ module.exports = {
     draw_cards: 'draw cards',
     timer_set: 'timer set',
     change_state: 'change state',
-    player_choices: 'player choices'
+    player_choices: 'player choices',
+    round_winner: 'round winner'
   },
   game: {
     game_start: 'game start',
@@ -24,6 +25,7 @@ module.exports = {
     draw_cards: 'draw cards',
     timer_set: 'timer set',
     change_state: 'change state',
-    player_choices: 'player choices'
+    player_choices: 'player choices',
+    round_winner: 'round winner'
   }
 };

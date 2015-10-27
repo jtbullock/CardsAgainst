@@ -20,4 +20,8 @@
   </div>
 </div>
 
+<div ng-if="vm.gameData.state == 'ShowWinner'">
+  {{vm.roundData.winner}} won!
+</div>
+
 <div game-timer end-time="{{ vm.gameData.timerExpires }}"></div>

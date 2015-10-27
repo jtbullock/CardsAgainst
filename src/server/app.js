@@ -143,6 +143,10 @@ io.on('connection', function (socket) {
           data.judge.socket.emit(EVENTS.socket.player_choices, data.choices);
         });
 
+        game.on(EVENTS.game.round_winner, function(winner) {
+          io.emit(EVENTS.socket.round_winner, winner.name);
+        });
+
         players.forEach(function(player) {
           player.socket.on(EVENTS.socket.choose_card, function(card) {
             console.log('%s chose card %s', player.name, card.id);

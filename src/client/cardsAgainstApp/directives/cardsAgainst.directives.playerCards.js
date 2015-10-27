@@ -15,11 +15,16 @@
     };
   }
 
-  function PlayerCardsController(GameService) {
+  function PlayerCardsController(GameService, $scope) {
     var vm = this;
     var selected;
 
     vm.cards = GameService.playerData.cards;
+    $scope.$on(GameService.events.draw_cards, function(event, cards) {
+      console.log('set cards');
+      console.log(cards);
+      vm.cards = cards;
+    });
 
     vm.selected = function(card) {
       return !!selected && selected === card;

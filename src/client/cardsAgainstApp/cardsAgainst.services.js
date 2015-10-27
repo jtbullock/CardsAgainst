@@ -13,7 +13,8 @@
     draw_cards:       'draw cards',
     timer_set:        'timer set',
     change_state:     'change state',
-    player_choices:   'player choices'
+    player_choices:   'player choices',
+    round_winner:     'round winner'
   };
   var client_events = {
     register_player:  'register player',
@@ -119,6 +120,12 @@
       gameSocket.on(server_events.player_choices, function(choices) {
         console.log('received PLAYER CHOICES');
         svc.roundData.playerChoices = choices;
+      });
+
+      gameSocket.on(server_events.round_winner, function(winner) {
+        console.log('received ROUND WINNER');
+        svc.gameData.wins[winner]++;
+        svc.roundData.winner = winner;
       });
     };
 

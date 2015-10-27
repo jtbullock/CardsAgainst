@@ -30,22 +30,22 @@ function Game(settings, players, firstJudge) {
         initial: true
       })
       .state('PlayersChoose', {
-        enter: beforePlayersChoose,
-        leave: afterPlayersChoose
+        enter: playersChoose,
       })
       .state('JudgeChoose', {
-        enter: beforeJudgeChoose,
-        leave: afterJudgeChoose
+        enter: judgeChoose
       })
       .state('ShowWinner', {
-        enter: beforeShowWinner,
-        leave: afterShowWinner
+        enter: showWinner
       })
+      .state('Exit', {})
       .event('start', 'Entry', 'PlayersChoose')
       .event('timeout', 'PlayersChoose', 'JudgeChoose')
       .event('finish', 'PlayersChoose', 'JudgeChoose')
       .event('timeout', 'JudgeChoose', 'ShowWinner')
-      .event('finish', 'JudgeChoose', 'ShowWinner');
+      .event('finish', 'JudgeChoose', 'ShowWinner')
+      .event('repeat', 'ShowWinner', 'PlayersChoose')
+      .event('finish', 'ShowWinner', 'Exit');
   });
 
   gameState.onChange = function(toState, fromState) {
@@ -83,8 +83,8 @@ function Game(settings, players, firstJudge) {
     console.log('selecting winner');
     if(player === judge) {
       var winner = _.find(players, {choice: card});
-      if(winner) console.log('%s wins!', winner.name);
-      else console.log('no winner found');
+      game.emit(EVENTS.game.round_winner, winner);
+      gameState.finish();
     }
   };
 
@@ -93,45 +93,30 @@ function Game(settings, players, firstJudge) {
 
   // STATE : PlayersChoose
 
-  function beforePlayersChoose() {
+  function playersChoose() {
+    console.log('Players Choose');
     setupRound();
-    startTimer(timeoutPlayersChoose, settings.gameTime * 1000);
+    startTimer(gameState.timeout, settings.gameTime * 1000);
   }
 
-  function timeoutPlayersChoose() {
-    gameState.timeout();
-  }
-
-  function afterPlayersChoose() {
-    stopTimer();
-  }
-
-  function beforeJudgeChoose() {
-    startTimer(timeoutPlayersChoose, settings.judgeTime * 1000);
+  function judgeChoose() {
+    console.log('Judge Choose');
+    startTimer(gameState.timeout, settings.judgeTime * 1000);
     game.emit(EVENTS.game.player_choices, {
       judge: judge,
       choices: playerChoices()
     });
   }
 
-  function timeoutJudgeChoose() {
-    gameState.timeout();
+  function showWinner() {
+    console.log('Show Winner');
+    startTimer(checkGameWinner, 10000);
   }
 
-  function afterJudgeChoose() {
-    clearTimeout(timer);
-  }
-
-  function beforeShowWinner() {
-
-  }
-
-  function timeoutShowWinner() {
-
-  }
-
-  function afterShowWinner() {
-
+  function checkGameWinner() {
+    var gameWinner = _.find(players, {wins: settings.winningPoints});
+    if(gameWinner) gameState.finish();
+    else gameState.repeat();
   }
 
   // ----------------------
@@ -162,6 +147,8 @@ function Game(settings, players, firstJudge) {
       if(player.isJudge) game.emit(EVENTS.game.make_judge, player);
       else if(wasJudge || wasUnset) game.emit(EVENTS.game.make_player, player);
 
+      console.log('%s, %s',player.name, player.isJudge);
+
       if(!player.isJudge) drawCards(player);
 
       player.choice = null;  // reset choice
@@ -181,12 +168,10 @@ function Game(settings, players, firstJudge) {
   }
 
   function startTimer(fn, duration) {
+    console.log('start timer');
+    clearTimeout(timer);
     game.emit(EVENTS.game.timer_set, Date.now() + duration);
     timer = setTimeout(fn, duration);
-  }
-
-  function stopTimer() {
-    clearTimeout(timer);
   }
 
   function gameData() {
