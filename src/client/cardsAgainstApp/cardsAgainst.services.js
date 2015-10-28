@@ -112,11 +112,6 @@
         svc.gameData.state = state;
       });
 
-      gameSocket.on(server_events.change_state, function(state) {
-        console.log('received CHANGE STATE');
-        svc.gameData.state = state;
-      });
-
       gameSocket.on(server_events.player_choices, function(choices) {
         console.log('received PLAYER CHOICES');
         svc.roundData.playerChoices = choices;

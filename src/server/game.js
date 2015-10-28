@@ -1,15 +1,25 @@
 var stateMachine = require('state-machine');
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var EVENTS = require('./EVENTS');
-var GamePack = require('./gamePack');
 var _ = require('lodash');
+
+var GamePack = require('./gamePack');
+var Player = require('./player');
 
 module.exports = Game;
 
-util.inherits(Game, EventEmitter);
-function Game(settings, players, firstJudge) {
-  EventEmitter.call(this);
+// Add events directly onto the constructor
+_.extend(Game, {
+  game_start:       'game start',
+  round_start:      'round start',
+  make_player:      'make player',
+  make_judge:       'make judge',
+  draw_cards:       'draw cards',
+  timer_set:        'timer set',
+  change_state:     'change state',
+  player_choices:   'player choices',
+  round_winner:     'round winner'
+});
+
+function Game(settings, nsp, players, firstJudge) {
 
   var game = this;
   var blackDeck = GamePack.generateBlackDeck();
@@ -49,19 +59,16 @@ function Game(settings, players, firstJudge) {
   });
 
   gameState.onChange = function(toState, fromState) {
-    game.emit(EVENTS.game.change_state, toState);
+    nsp.emit(Game.change_state, toState);
     console.log('state changed from %s to %s', fromState, toState);
   };
-
-  players.forEach(function(player) {
-    player.wins = 0;
-  });
 
   /**
   * starts the game
   */
   this.start = function() {
-    game.emit(EVENTS.game.game_start, gameData());
+    initialize();
+    nsp.emit(Game.game_start, gameData());
     gameState.start();
   };
 
@@ -75,15 +82,14 @@ function Game(settings, players, firstJudge) {
       if(allPlayersChosen()) {
         gameState.finish();
       }
-      else game.emit(EVENTS.game.game_data, gameData());
+      else nsp.emit(Game.game_data, gameData());
     }
   };
 
   this.chooseWinner = function(player, card) {
-    console.log('selecting winner');
-    if(player === judge) {
+    if(player.isJudge) {
       var winner = _.find(players, {choice: card});
-      game.emit(EVENTS.game.round_winner, winner);
+      nsp.emit(Game.round_winner, winner.name);
       gameState.finish();
     }
   };
@@ -91,6 +97,17 @@ function Game(settings, players, firstJudge) {
   // --------------------------
   // State Change Hooks
 
+  function initialize() {
+    players.forEach(function(player) {
+      player.wins = 0;
+      player.socket.on(Player.choose_card, function(card) {
+        game.chooseCard(player, card);
+      });
+      player.socket.on(Player.choose_winner, function(winningCard) {
+        game.chooseWinner(player, winningCard);
+      });
+    });
+  }
   // STATE : PlayersChoose
 
   function playersChoose() {
@@ -102,21 +119,16 @@ function Game(settings, players, firstJudge) {
   function judgeChoose() {
     console.log('Judge Choose');
     startTimer(gameState.timeout, settings.judgeTime * 1000);
-    game.emit(EVENTS.game.player_choices, {
-      judge: judge,
-      choices: playerChoices()
-    });
+    judge.socket.emit(Game.player_choices, playerChoices());
   }
 
   function showWinner() {
     console.log('Show Winner');
-    startTimer(checkGameWinner, 10000);
-  }
-
-  function checkGameWinner() {
-    var gameWinner = _.find(players, {wins: settings.winningPoints});
-    if(gameWinner) gameState.finish();
-    else gameState.repeat();
+    startTimer(function() {
+      var gameWinner = _.find(players, {wins: settings.winningPoints});
+      if(gameWinner) gameState.finish();
+      else gameState.repeat();
+    }, 10000);
   }
 
   // ----------------------
@@ -134,20 +146,21 @@ function Game(settings, players, firstJudge) {
     // choose next topic
     topic = blackDeck.draw();
 
-    game.emit(EVENTS.game.round_start, {
-      topic: topic,
-      judge: judge.name
-    });
+    nsp.emit(Game.round_start, roundData());
 
     // setup each player for the round
     players.forEach(function(player) {
       var wasUnset = player.isJudge === undefined;
       var wasJudge = !!player.isJudge;
-      player.isJudge = (player === judge);
-      if(player.isJudge) game.emit(EVENTS.game.make_judge, player);
-      else if(wasJudge || wasUnset) game.emit(EVENTS.game.make_player, player);
 
-      console.log('%s, %s',player.name, player.isJudge);
+      player.isJudge = (player === judge);
+
+      if(player.isJudge) {
+        player.socket.emit(Game.make_judge, player.getData());
+      }
+      else if(wasJudge || wasUnset) {
+        player.socket.emit(Game.make_player, player.getData());
+      }
 
       if(!player.isJudge) drawCards(player);
 
@@ -161,17 +174,20 @@ function Game(settings, players, firstJudge) {
       var card = whiteDeck.draw();
       player.cards.push(card);
     }
-    game.emit(EVENTS.game.draw_cards, {
-      player: player,
-      cards: player.cards
-    });
+    player.socket.emit(Game.draw_cards, player.cards);
   }
 
   function startTimer(fn, duration) {
-    console.log('start timer');
     clearTimeout(timer);
-    game.emit(EVENTS.game.timer_set, Date.now() + duration);
+    nsp.emit(Game.timer_set, Date.now() + duration);
     timer = setTimeout(fn, duration);
+  }
+
+  function roundData() {
+    return {
+      topic: topic,
+      judge: judge.name
+    };
   }
 
   function gameData() {
