@@ -17,6 +17,8 @@
       templateUrl: 'templates/cardsAgainst.directives.gameTimer.html',
       link: function(scope, element, attributes) {
         attributes.$observe('endTime', scope.vm.setTimer);
+        $(element)
+          .addClass('game-timer')
       }
     };
   }

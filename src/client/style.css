@@ -32,3 +32,27 @@
 .site-title {
     font-size:16pt;
 }
+
+.game-topic {
+  color: white;
+  background-color: black;
+  border-radius: 3px;
+  border: 1px solid #888;
+  height: 100px;
+  padding: 10px;
+  font-weight: 600;
+  font-size: 1.1em;
+  margin: 0 10px 10px;
+  width: 100%;
+}
+
+.game-timer {
+  border-radius: 3px;
+  text-align: center;
+  border: 1px solid #888;
+  padding: 2px;
+  font-weight: 600;
+  font-size: 2em;
+  margin: 0 10px 10px;
+  width: 100%;
+}
